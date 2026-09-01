@@ -7,19 +7,17 @@
      <script src="URL-OF-THIS-FILE" defer></script>
 
    data-service is one of: roofing | windows | doors | siding | hub
-   Omit the div entirely and the script picks the funnel from the page URL.
 
-   Why hosted rather than pasted: Webflow caps custom code at 50,000
-   characters per field and this file is roughly twice that. Hosting also
-   means one copy of the prices instead of five.
+   After committing a change, purge the CDN cache or pages keep the old file:
+     https://purge.jsdelivr.net/gh/ddavis-ctrl/cenvar-estimator@main/estimator.js
 
-   EDIT PRICES in the PRICES object. EDIT COLOURS in BRAND. EDIT COPY in
-   SERVICES and SETTINGS.company. Re-upload after any change.
+   EDIT PRICES in PRICES. EDIT COLOURS in BRAND. EDIT COPY in SERVICES and
+   SETTINGS.company. Paste the whole file into a browser console before
+   committing: if it errors, do not commit, or the funnel goes down.
    ============================================================================ */
 
 (function () {
   "use strict";
-  // Styles live here rather than in a <style> tag so this is a single file.
   if (!document.getElementById("rfx-styles")) {
     var st = document.createElement("style");
     st.id = "rfx-styles";
@@ -402,11 +400,11 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       mapsKey: "",
       satelliteZoom: 19
     },
-    pages: {   // TODO: match your Webflow slugs
-      roofing: "/roofing-estimate",
-      windows: "/window-estimate",
-      doors:   "/door-estimate",
-      siding:  "/siding-estimate"
+    pages: {
+      roofing: "/lander-roofing-estimate",
+      windows: "/lander-windows-estimate",
+      doors:   "/lander-doors-estimate",
+      siding:  "/lander-siding-estimate"
     },
     // Pulled from cenvarroofing.com. Edit if any of it is stale.
     company: {
