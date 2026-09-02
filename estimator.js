@@ -1,19 +1,15 @@
 /* ============================================================================
    CENVAR INSTANT ESTIMATE FUNNEL
    ============================================================================
-   Host this file, then on each Webflow page add a Code Embed containing:
-
+   Embed on each Webflow page:
      <div class="rfx-mount" data-service="roofing"></div>
      <script src="URL-OF-THIS-FILE" defer></script>
+   data-service: roofing | windows | doors | siding | hub
 
-   data-service is one of: roofing | windows | doors | siding | hub
-
-   After committing a change, purge the CDN cache or pages keep the old file:
+   After committing, purge the CDN or pages keep the old file:
      https://purge.jsdelivr.net/gh/ddavis-ctrl/cenvar-estimator@main/estimator.js
 
-   EDIT PRICES in PRICES. EDIT COLOURS in BRAND. EDIT COPY in SERVICES and
-   SETTINGS.company. Paste the whole file into a browser console before
-   committing: if it errors, do not commit, or the funnel goes down.
+   PASTE YOUR GOOGLE MAPS KEY into SETTINGS.google.mapsKey below.
    ============================================================================ */
 
 (function () {
@@ -397,8 +393,13 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       // TODO. Enable Maps JavaScript API, Places API, Static Maps API.
       // Restrict the key by HTTP referrer to your Webflow domain.
       // Left blank, the address step becomes a plain text input.
-      mapsKey: "",
-      satelliteZoom: 19
+      mapsKey: "AIzaSyB6zBRGSktgccadfgHSsPm4JNqTFQoejJY",
+      satelliteZoom: 19,
+      // Street View framing. Omitting heading makes Google point the camera at
+      // the address from wherever the nearest photo was taken, which is what
+      // you want. source=outdoor keeps it off indoor business panoramas.
+      streetFov: 80,
+      streetPitch: 8
     },
     pages: {
       roofing: "/lander-roofing-estimate",
@@ -445,7 +446,12 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
     bookingUrl: "",              // TODO: HubSpot meetings link
     tracking: { adsConversionId: null },   // TODO: e.g. "AW-123456789/AbC-D_efGh"
-    roundTo: 50
+    roundTo: 50,
+
+    // Internal QA only. true removes the contact step so the price shows
+    // straight after the last question, and disables the HubSpot submission.
+    // MUST stay false on the live site or you collect no leads.
+    previewMode: false
   };
 
   /* =========================================================================
@@ -520,6 +526,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     roofing: {
       label: "Roofing", hubNote: "Shingle, corrugated, or standing seam",
       intro: "Get your roof price in about a minute",
+      // "street" uses Street View and falls back to satellite where Google
+      // has no imagery. "satellite" always uses the overhead view.
+      view: "satellite",   // overhead shows the roof planes and dormers
       // Inlined as a CSS mask, so the icon takes the colour of the text
       // beside it rather than being locked to white. ~4KB, no hosting needed.
       icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAQAAAD2e2DtAAANMElEQVR42u2da5AU1RmGnx3GsVkBBRRQLiu4XFwUWQSFCHgLpkQ0GpTEKDGxlJiCxBipqCkCRkqjkcSoeEuIiQlZEVMKeClALRUwIooYRUQuEkBRhHAJsvTO9vbJj1mpSLHs9Onu2ZnZ95kfwLIzc/p8T58+/fW5lBhEcyahKpAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSAkgJAAQgIICSCyJtlsj9yhjIEMoRul7OETVvIe77NLAhQ/LRjEtVxKm4P83ws8zAL2Np/KKDHN7ZJ3EQ9yLAAePgkggQ/4QKr+t37D7fxXAhQfxzOXfoBLksRB+z8eHikSwBieVCewuBjDBvrh4uOQbODIkzgkSOMzm6r9LYJagMI/TqYwBbf+7M4GF4dVDGZPLD2vUlqQZh++WoDcHOUjTMHFCXC8Dmkq+ICjIg79COaxjd3s4As+4j56NXHdmOJ/Jc3Txph9Jji1xpht5pjISvI1s2n/J9eauvq/z4vwGwK/iv8S4PAKp+PiWL3bI0k1PdkSQUkmcvcBHVAfDx8HqOQd9QHioBXL6UU6RHfOI4FPORtDluQW7qD6oBchD58UfVklAaLmaFbSMVT4qc8QJOjF2hCfMZjX+YJWDUrm49MWV53AKOnBZjrihb6ZSwAea6iw/oQWzME7xEUoiY/DTWoBoqSSt/HxI0p2+3ik6Md7Vu8ezquN9kI8oHXu24BibQGG8TZponvWkSBJmneptHr3tfVJ58a6mwN0CYiGS1lEusFsXxgF3maoxTvPJpGVimdIgCgYz5OBcn7BFFjMiMDJn85Z1HQC6CMBwjOJ6VRb3vVno4DLQi4I1s/KOhJtJEDILi3TmEo1pTHWVwqXZ7m4WKqsmARowUxuxI0x/Jkac3B5msuLIxrFMyLocBZwplXKN3h30cGliiOYUfjVViwCtGYZfUhbhD+TKPIDK1DNHzmcB3QJyAfas5Y+VilfjyT34JLAC/jOUlymM1ECND2d+bdVytcnTZKL+RkVeBYKOFRzN5MiPBJfAgSnJx9Tihf4Yubjk+JM5gIbKLNsBaqZyh2FHI1CF+B01uBZ9GUy7+nPovp/b6EH1SStLgS3MD3Le31dAiLmfJaSbmB8b2NX/jRl/Ov/fraV7my3UMDBZTwzI6lJXQIC8R2erx9fE/y273PK2HTAz7fTk09IkrZQ4LvMKsy6LFwBJvB4wGGeX4Y/xSrK+fwg/7eLE9lIykqBy3iqEG+qC1OAEm7jfqukj0uKVxnQ4GDvPfRlrZUCab7JixwmAXJR5hn80ir81TjM4VxqDvE7e+nPuxYKpHA5k0Whxh/pLiCrip7P1ZZnfykzGE1do5qcxlJSgUfnOKQZzNKYnkRKAABa8gYjLMPvMIVxWfW0axjOfJzACqRIU8nymB9HNWMBjuQ9+ltl/F0cruU2sh0CWcso5lgqUMEqyyf7ug08JB35iBMsMv4+aRwuCfjsro7RVFkqUMZq2qoPEC0nsIl2Vhl/jxTDmWNxPl7Jo1YKeBzLOo7WJSA6BrKOpEXGPzPrZgCLrb7VcA0zLBRI4tGODXTSJSAazuNNy4x/kgS9WWH9zYZxPIhDtYUCpWykW77XcSEIcDkLcC0y/mmS7KALa0J9u2E8d1Fq0Qr4JNlIp0NmHSRAo/yYKuuU71p68GkEZbiZKVatAMAGRuTz2mP5LsBk7rNO+S6lH7sjKsdtTKQ0sAIJfBzmZ31TqLuAr1DCvfzKOukzl2GRzrT7LT+yuBAk8PHyuZbzt2hJZvMT6/A/wrcCP9lvjIf5vsUdQSK/nxHmqwCH8zKXWod/KtfFckv1GJdbKJDX5KedrXiDCuuU70+5N7aSzWIv82KZeagWYD/tWUeFVcrXxWFsjOEHeIZzcEg3/QJvxSpAVzZZLevi4+Ewipmxl/BlhuHgFYcC+SbAiWzCscr4+6QYynM5KeUShpAqDgXyS4DBrAoxyPtkXstZSZcyoDgUyCcBRvK69SDvaspYmdPSrqAvKfxCVyB/BBjLc9aDvDcfZJB3/KyivH4FMQkQmon81Srj75JiOb3Z0SSlXk8ZaYspZRLgK5RwF3dbJ30WMoR9TVb2j+luNaVMAuynBX/m51ar+rg4zOR8apu0/J/RnV2Fq0BTC5BiAVdZLevi4vB7vpcHnbDtlLPdYkqZBOAIlnOudeM/iRvIj4VO/0O51ZSyZi5AOz7kJIuMfybl+0Nuz6N63E0FKwtRgaYT4Dg20NlylK/DJfwhz2qymoG8WXgKNJUAfdhMG+t1PWwGecdPDUNZYjGlrBkKMJgPrFby/jLluzhPazPNObwcYsRAbfMQ4PwQKV+XbjlO+QYN4XkstFIggcdQq/lEBSbAFSHW9dhKGZvzvE31GGk1qzBBgs6so0NxCzCBmdaDvNfQk+0FcFmtYzSPWSmQmU/UsXgFmML9ljm/FIs4JZZNHOPA5wfcbzmlzGEdx+WwrDnboS5hHrLcvW+fMWaWaVFw+xXeaYzZa7FXYZ2pNcfnqpT5v3njXmPMfaakILesvNXqmOtMrTGmVzEJ0NIsDXH231rAu5beEkKBimIR4EizxhhTY3n2X1/gG9deb3UhqDM1xphTi2Hr2A58QDvrdT2u5O8UOlfzJ4sHXpmFLQbzRryFi1uA7qwmZZXy9UjxDRZSDHybWVYKpHE4i1cLV4D+rAiR8h3EWxQLo3jGYj5RRoELeL4w8wDnsMJq88ZMe1FeROGHZznPYj5RZn+i57ioEAUYw0vWKd8ddGU9xcULlvOJHFzmclmhCTCOJ6xTvhvowWcUH0sYbDWZxMFlNlcVUibw5hB3/W+ZlgV+43eoV6UxpsbUWdXMhMLIA5SYaVZ3vpmDfNEcVsThx2BOtlRgrzFmYv4L0MJUhTj7qwow4x/8VVGf8bdRYHJ+C5Ayr4QI/z0FmvEP/irfn+4NXkvToq2lKA+r1KwIEf6bm0nwM69upsYYSwWmR6lAdImg9qygq3XKd2wOFnbILzrxodWwWBeHGYyLakZEVAJ0431aNfuUb9BTZhUdLBWoYmw0c6KiEaAvK61Svpn3DCqqnF8QjuR9Olu0mi4Oz0SzEF4UiaAzWBliXY/ezTb8sJs+lltUuVzI/CjWeAsvwEiWhBjk3TXkUs6FzhecwjuWCpzLS6G2qIpEgCtDrOuxlTI+prmzj8FWU8oc0gwPv0VVOAFu5G/WGf/VBTLIO35qGMo/rTaqS1PJm7RsGgFKuINp1oO8l9C/YAZ5x0+as3jBYlZhijQn8VaoXcqsB3k/GiLp87RJNqu0T3ZJ9GetarTGGLPOtM5tJjBp5oUY5P2QSSjgBz2pZlsrsMW0y50AjnktRPgnK9SRt6u1xpidpkNuBDjKrLMc5L3PGDNOYW7kYfp0awX2mS7xPwvoyBraWC7lnOJi5qrH1yh3cpPFGOLMviQ9+SjOVHBbNoXI+A9jiaKbFZOYajWM3CdJL9bGJUCSNXS3Ovt9klTyjiKbNTfwO6tWANK0D3I7GSQPMJ7uuIHDn2mayhX+QNzDddbbVd4aTwtQyk4SgXP+aVLs4sSiHOUbN1fxF6tWIEnb7HcqzD6cI0nhW4R/Pd0VfivstqjygQvjuARcEThxnEn5npTP+2bmObO4LLACCWB0HAIMCihAZvPGs4trk7Wc8w8uwMENMPonAQyIQ4BjAv22i8OjMWze2Px4PuAuZQngiDgE2Bnw7P811xTL1mpNTLBdynzg8zgEWFb/4dmFfwK/yJOVvIuBJZye9axCHz/IigLZC/AE2eyOk1nJewwPKGqRsizrLap8ElTFkQdozQ4aG/jZnAd5x09vVuM1konx8dlBl+xXHc6+BdjDZJKH7NN7+KSoVPhj4kPKGt2lzCXJNUEWnQ7yLOAwNnJsg88CMm4GfBQhAtKN9SQbjIGLw0uMCNL7CnJnX8spuA2MXHNJUk1nhT9mNtGFT0gdJDPgUY3DSkYF63wHy+1toxurcYB0fZ/UxyMNOGymnC2KUOxspZyncEjgkcbDq/8zSSmPc2rgxJvFeMCrzc4DxqNsM9cV/cIO+fUaZpYdEIOFZmDuZge35DTGMIROfMYKZrFYCd+ck6ALX2cAR/MpS3mdzXZ5lxJla5q7R0ICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQAEICCAkgJICQACIr/gffmX+0joZIAQAAAABJRU5ErkJggg==",
@@ -563,6 +572,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     windows: {
       label: "Windows", hubNote: "Priced per window, 1 to 50",
       intro: "Get your window price in about a minute",
+      // "street" uses Street View and falls back to satellite where Google
+      // has no imagery. "satellite" always uses the overhead view.
+      view: "street",   // the front elevation is where the windows are
       // Inlined as a CSS mask, so the icon takes the colour of the text
       // beside it rather than being locked to white. ~4KB, no hosting needed.
       icon: "data:image/png;base64,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",
@@ -601,6 +613,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     doors: {
       label: "Doors", hubNote: "Entry, double, and patio doors",
       intro: "Get your door price in about a minute",
+      // "street" uses Street View and falls back to satellite where Google
+      // has no imagery. "satellite" always uses the overhead view.
+      view: "street",   // the entry door faces the street
       // Inlined as a CSS mask, so the icon takes the colour of the text
       // beside it rather than being locked to white. ~4KB, no hosting needed.
       icon: "data:image/png;base64,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",
@@ -773,6 +788,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     siding: {
       label: "Siding", hubNote: "Vinyl and insulated vinyl",
       intro: "Get your siding price in about a minute",
+      // "street" uses Street View and falls back to satellite where Google
+      // has no imagery. "satellite" always uses the overhead view.
+      view: "street",   // siding is judged from the ground, not from above
       // Inlined as a CSS mask, so the icon takes the colour of the text
       // beside it rather than being locked to white. ~4KB, no hosting needed.
       icon: "data:image/png;base64,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",
@@ -862,6 +880,16 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     return mapsPromise;
   }
 
+  // return_error_code makes Google send a 404 when it has no photo of this
+  // spot, instead of the grey "no imagery available" tile. That 404 is what
+  // triggers the fall back to satellite below.
+  const streetViewUrl = (lat, lng) =>
+    "https://maps.googleapis.com/maps/api/streetview?size=640x360&scale=2" +
+    "&location=" + lat + "," + lng +
+    "&fov=" + SETTINGS.google.streetFov + "&pitch=" + SETTINGS.google.streetPitch +
+    "&source=outdoor&return_error_code=true" +
+    "&key=" + encodeURIComponent(SETTINGS.google.mapsKey);
+
   const satelliteUrl = (lat, lng) =>
     "https://maps.googleapis.com/maps/api/staticmap?center=" + lat + "," + lng +
     "&zoom=" + SETTINGS.google.satelliteZoom + "&size=640x360&scale=2&maptype=satellite" +
@@ -882,7 +910,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     };
 
     const questions = () => S.questionsFor ? S.questionsFor(state.answers) : S.questions;
-    const totalSteps = () => 1 + questions().length + 2;
+    const totalSteps = () => 1 + questions().length + (PREVIEW ? 1 : 2);
 
     root.classList.add("rfx");
     applyBrand(root);
@@ -910,11 +938,13 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       courses.setAttribute("aria-valuemax", String(n));
     }
 
+    const PREVIEW = SETTINGS.previewMode === true;
+
     function kind() {
       const qs = questions();
       if (state.index === 0) return "address";
       if (state.index <= qs.length) return "question";
-      if (state.index === qs.length + 1) return "contact";
+      if (!PREVIEW && state.index === qs.length + 1) return "contact";
       return "price";
     }
 
@@ -947,6 +977,10 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     --------------------------------------------------------------------- */
     function renderAddress() {
       nextBtn.textContent = "Continue";
+      // Set before the markup is built, or the input renders empty.
+      if (PREVIEW && !state.place.address) {
+        state.place.address = "123 Sample St, Lynchburg, VA 24501";
+      }
       stage.innerHTML = heroMark("address") +
         '<p class="rfx-kicker">' + iconMark() + esc(S.label) + '</p>' +
         '<h2 class="rfx-h">Where is your home?</h2>' +
@@ -968,9 +1002,27 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
       function showSat() {
         if (!state.place.lat) { wrap.innerHTML = ""; return; }
-        wrap.innerHTML = '<div class="rfx-sat"><img alt="Satellite view of ' +
-          esc(state.place.address) + '" src="' + satelliteUrl(state.place.lat, state.place.lng) +
+        const lat = state.place.lat, lng = state.place.lng;
+        const street = S.view === "street";
+        const first = street ? streetViewUrl(lat, lng) : satelliteUrl(lat, lng);
+        const alt = (street ? "Street view of " : "Satellite view of ") + state.place.address;
+
+        wrap.innerHTML = '<div class="rfx-sat"><img alt="' + esc(alt) + '" src="' + first +
           '"><div class="rfx-sat-tag">' + esc(state.place.address) + '</div></div>';
+
+        const img = wrap.querySelector("img");
+        img.addEventListener("error", function () {
+          // Street View had nothing here. Drop to the overhead view rather than
+          // showing a broken frame. If that fails too, remove the block.
+          if (street && !img.dataset.fellBack) {
+            img.dataset.fellBack = "1";
+            img.alt = "Satellite view of " + state.place.address;
+            img.src = satelliteUrl(lat, lng);
+            return;
+          }
+          const box = wrap.querySelector(".rfx-sat");
+          if (box) box.remove();
+        });
       }
       function gate() {
         nextBtn.disabled = state.place.address.trim().length < 6;
@@ -1210,6 +1262,10 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
       // If the GUID is not configured yet, do not strand the customer on a
       // failed send. Warn in the console and let them through to the price.
+      if (PREVIEW) {
+        console.log("[estimator] preview mode, nothing sent. Payload:", pairs);
+        return Promise.resolve(false);
+      }
       if (!SETTINGS.hubspot.formGuid || SETTINGS.hubspot.formGuid.indexOf("TODO") === 0) {
         console.warn("[estimator] No HubSpot form GUID set. Lead NOT sent. Payload:", pairs);
         return Promise.resolve(false);
@@ -1329,6 +1385,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     }
 
     function renderPrice() {
+      // In preview there is no contact step, so the price is worked out here.
+      if (PREVIEW) state.result = S.price(state.answers);
       const r = state.result;
       const recap = '<div class="rfx-recap">' +
         (state.place.address ? '<div class="rfx-recap-row"><span class="rfx-recap-k">Home</span>' +
