@@ -1,23 +1,23 @@
 /* ============================================================================
    CENVAR INSTANT ESTIMATE FUNNEL
    ============================================================================
-   Embed on each Webflow page:
-     <div class="rfx-mount" data-service="roofing"></div>
-     <script src="URL-OF-THIS-FILE" defer></script>
+   Embed:  <div class="rfx-mount" data-service="roofing"></div>
+           <script src="URL-OF-THIS-FILE" defer></script>
    data-service: roofing | windows | doors | siding | hub
 
-   After committing, purge the CDN or pages keep the old file:
+   After committing, purge or pages keep the old file:
      https://purge.jsdelivr.net/gh/ddavis-ctrl/cenvar-estimator@main/estimator.js
 
-   PASTE YOUR GOOGLE MAPS KEY into SETTINGS.google.mapsKey below.
+   PASTE YOUR GOOGLE MAPS KEY into SETTINGS.google.mapsKey.
+   If Google is unavailable the address step falls back to manual entry, so a
+   Maps outage costs a photo, not a lead.
    ============================================================================ */
 
 (function () {
   "use strict";
   if (!document.getElementById("rfx-styles")) {
     var st = document.createElement("style");
-    st.id = "rfx-styles";
-    st.textContent = `
+    st.id = "rfx-styles"; st.textContent = `
 /* Colors and fonts are driven by the BRAND block in the script below.
    Do not edit hex values in here — they are only fallbacks. */
 .rfx{--rfx-ink:#1B2A33;--rfx-ink-2:#3A5566;--rfx-mute:#6B8494;--rfx-surface:#EDF0EE;
@@ -968,55 +968,101 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     }
 
     /* --- Address ---------------------------------------------------------
-       Google retired google.maps.places.Autocomplete for accounts created
-       after 1 Mar 2025, so this uses PlaceAutocompleteElement. That element
-       ships its own input inside a closed shadow root, which means it cannot
-       be styled from here; it will look like Google's control, not ours.
-       If it is unavailable (older account) we fall back to the legacy widget,
-       and if Maps fails entirely we fall back to a plain typed address.
+       Three modes:
+         search   type and pick from Google's suggestions
+         confirm  show the photo and have them verify it is their home
+         manual   structured fields, no Google at all
+       Manual is reachable on purpose (the photo is wrong) and automatically
+       (Google failed to load). Either way the funnel never dead-ends, so an
+       outage costs a satellite image, not a lead.
     --------------------------------------------------------------------- */
     function renderAddress() {
-      nextBtn.textContent = "Continue";
-      // Set before the markup is built, or the input renders empty.
-      if (PREVIEW && !state.place.address) {
-        state.place.address = "123 Sample St, Lynchburg, VA 24501";
+      const P = state.place;
+      if (PREVIEW && !P.address && !P.mode) {
+        P.address = "123 Sample St, Lynchburg, VA 24501";
       }
+      if (!P.mode) P.mode = "search";
+      nextBtn.textContent = "Continue";
+
+      // Photo sits directly under the heading, above the explainer line.
+      const photo = P.lat
+        ? '<div class="rfx-sat-wrap"></div>'
+        : '<div class="rfx-sat-wrap"></div>';
+
+      const sub =
+        P.mode === "confirm"
+          ? 'Take a look. Is this the home you want priced?'
+          : P.mode === "manual"
+            ? 'Enter the address and we will take it from there.'
+            : esc(S.intro) + '. Start typing and pick your address from the list.';
+
+      let body = "";
+      if (P.mode === "manual") {
+        body =
+          '<div class="rfx-field">' +
+            '<label class="rfx-field-label" for="rfxSt_' + serviceId + '">Street address</label>' +
+            '<input class="rfx-input rfx-m-street" id="rfxSt_' + serviceId + '" type="text" ' +
+            'autocomplete="street-address" placeholder="123 Main St" value="' + esc(P.street || "") + '">' +
+          '</div>' +
+          '<div class="rfx-grid-2">' +
+            '<div class="rfx-field">' +
+              '<label class="rfx-field-label" for="rfxCity_' + serviceId + '">City</label>' +
+              '<input class="rfx-input rfx-m-city" id="rfxCity_' + serviceId + '" type="text" ' +
+              'autocomplete="address-level2" value="' + esc(P.city || "") + '">' +
+            '</div>' +
+            '<div class="rfx-field">' +
+              '<label class="rfx-field-label" for="rfxZip_' + serviceId + '">ZIP code</label>' +
+              '<input class="rfx-input rfx-m-zip" id="rfxZip_' + serviceId + '" type="text" ' +
+              'inputmode="numeric" maxlength="5" autocomplete="postal-code" value="' + esc(P.zip || "") + '">' +
+            '</div>' +
+          '</div>' +
+          '<p class="rfx-manual"><button type="button" class="rfx-linkish rfx-back-search">' +
+          'Search for my address instead</button></p>';
+      } else if (P.mode === "confirm") {
+        body =
+          '<div class="rfx-options" id="rfxConfirm_' + serviceId + '">' +
+            '<button type="button" class="rfx-opt' + (P.confirmed ? " is-on" : "") + '" data-v="yes">' +
+              '<span class="rfx-opt-tick"></span><span class="rfx-opt-body">' +
+              '<span class="rfx-opt-title">Yes, that is my home</span></span></button>' +
+            '<button type="button" class="rfx-opt" data-v="no">' +
+              '<span class="rfx-opt-tick"></span><span class="rfx-opt-body">' +
+              '<span class="rfx-opt-title">No, let me type the address</span>' +
+              '<span class="rfx-opt-note">Wrong house, or no photo available</span></span></button>' +
+          '</div>';
+      } else {
+        body =
+          '<div class="rfx-field">' +
+            '<label class="rfx-field-label" for="rfxAddr_' + serviceId + '">Street address</label>' +
+            '<div class="rfx-ac"><input class="rfx-input rfx-addr" id="rfxAddr_' + serviceId +
+            '" type="text" autocomplete="off" placeholder="123 Main St" value="' +
+            esc(P.address || "") + '"></div>' +
+            '<p class="rfx-manual" hidden><button type="button" class="rfx-linkish rfx-go-manual">' +
+            'Enter your address manually instead</button></p>' +
+          '</div>';
+      }
+
       stage.innerHTML = heroMark("address") +
         '<p class="rfx-kicker">' + iconMark() + esc(S.label) + '</p>' +
         '<h2 class="rfx-h">Where is your home?</h2>' +
-        '<p class="rfx-sub">' + esc(S.intro) + '. Start typing and pick your address ' +
-        'from the list.</p>' +
-        '<div class="rfx-field">' +
-          '<label class="rfx-field-label" for="rfxAddr_' + serviceId + '">Street address</label>' +
-          '<div class="rfx-ac"><input class="rfx-input rfx-addr" id="rfxAddr_' + serviceId +
-          '" type="text" autocomplete="off" placeholder="123 Main St" value="' +
-          esc(state.place.address) + '"></div>' +
-          '<p class="rfx-manual" hidden><button type="button" class="rfx-linkish">' +
-          'Enter your address manually instead</button></p>' +
-        '</div>' +
-        '<div class="rfx-sat-wrap"></div>';
+        photo +
+        '<p class="rfx-sub">' + sub + '</p>' +
+        body;
 
-      const slot = q(".rfx-ac");
       const wrap = q(".rfx-sat-wrap");
-      const manualWrap = q(".rfx-manual");
 
-      function showSat() {
-        if (!state.place.lat) { wrap.innerHTML = ""; return; }
-        const lat = state.place.lat, lng = state.place.lng;
+      function drawPhoto() {
+        if (!P.lat) { wrap.innerHTML = ""; return; }
+        const lat = P.lat, lng = P.lng;
         const street = S.view === "street";
         const first = street ? streetViewUrl(lat, lng) : satelliteUrl(lat, lng);
-        const alt = (street ? "Street view of " : "Satellite view of ") + state.place.address;
-
+        const alt = (street ? "Street view of " : "Satellite view of ") + P.address;
         wrap.innerHTML = '<div class="rfx-sat"><img alt="' + esc(alt) + '" src="' + first +
-          '"><div class="rfx-sat-tag">' + esc(state.place.address) + '</div></div>';
-
+          '"><div class="rfx-sat-tag">' + esc(P.address) + '</div></div>';
         const img = wrap.querySelector("img");
         img.addEventListener("error", function () {
-          // Street View had nothing here. Drop to the overhead view rather than
-          // showing a broken frame. If that fails too, remove the block.
           if (street && !img.dataset.fellBack) {
             img.dataset.fellBack = "1";
-            img.alt = "Satellite view of " + state.place.address;
+            img.alt = "Satellite view of " + P.address;
             img.src = satelliteUrl(lat, lng);
             return;
           }
@@ -1024,40 +1070,78 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           if (box) box.remove();
         });
       }
-      function gate() {
-        nextBtn.disabled = state.place.address.trim().length < 6;
+      drawPhoto();
+
+      function toManual(reason) {
+        P.mode = "manual";
+        P.lat = null; P.lng = null; P.confirmed = false;
+
+        if (reason === "rejected") {
+          // They said the photo is not their home, so everything Google gave
+          // us is wrong, including the postal code. Start clean rather than
+          // letting a wrong ZIP ride along with a corrected street.
+          P.address = ""; P.street = ""; P.city = ""; P.zip = "";
+        } else if (P.address && !P.street) {
+          // Came here before selecting anything: keep whatever was typed.
+          P.street = P.address; P.zip = "";
+        }
+        render();
       }
-      function wireTyping(input) {
-        input.addEventListener("input", (ev) => {
-          state.place.address = ev.target.value;
-          state.place.lat = null; state.place.lng = null; state.place.zip = "";
-          wrap.innerHTML = "";
-          gate();
+
+      function accept(addr, lat, lng, zip, city) {
+        P.address = addr || "";
+        P.lat = lat; P.lng = lng;
+        P.zip = zip || ""; P.city = city || "";
+        P.confirmed = false;
+        P.mode = "confirm";
+        render();
+      }
+
+      /* --- manual mode --- */
+      if (P.mode === "manual") {
+        const st = q(".rfx-m-street"), ci = q(".rfx-m-city"), zp = q(".rfx-m-zip");
+        const sync = () => {
+          P.street = st.value.trim();
+          P.city   = ci.value.trim();
+          P.zip    = zp.value.trim();
+          P.address = [P.street, P.city].filter(Boolean).join(", ") +
+                      (P.zip ? " " + P.zip : "");
+          nextBtn.disabled = !(P.street.length >= 5 && /^\d{5}$/.test(P.zip));
+        };
+        [st, ci, zp].forEach((el) => el.addEventListener("input", sync));
+        q(".rfx-back-search").addEventListener("click", () => {
+          P.mode = "search"; P.confirmed = false; render();
         });
-      }
-      function useManualInput() {
-        slot.innerHTML = '<input class="rfx-input rfx-addr" type="text" ' +
-          'autocomplete="street-address" placeholder="123 Main St" value="' +
-          esc(state.place.address) + '">';
-        manualWrap.hidden = true;
-        wireTyping(slot.querySelector("input"));
-        gate();
+        sync();
+        return;
       }
 
-      manualWrap.querySelector(".rfx-linkish")
-        .addEventListener("click", useManualInput);
-
-      showSat();
-      wireTyping(slot.querySelector("input"));
-      gate();
-
-      function accept(addr, lat, lng, zip) {
-        state.place.address = addr || "";
-        state.place.lat = lat; state.place.lng = lng;
-        state.place.zip = zip || "";
-        showSat();
-        nextBtn.disabled = !state.place.address;
+      /* --- confirm mode --- */
+      if (P.mode === "confirm") {
+        const box = q("#rfxConfirm_" + serviceId);
+        box.addEventListener("click", (e) => {
+          const b = e.target.closest(".rfx-opt");
+          if (!b) return;
+          if (b.dataset.v === "no") { toManual("rejected"); return; }
+          P.confirmed = true;
+          Array.from(box.children).forEach((c) => c.classList.toggle("is-on", c === b));
+          nextBtn.disabled = false;
+        });
+        nextBtn.disabled = !P.confirmed;
+        return;
       }
+
+      /* --- search mode --- */
+      const slot = q(".rfx-ac");
+      const input = slot.querySelector("input");
+      const manualWrap = q(".rfx-manual");
+      q(".rfx-go-manual").addEventListener("click", () => toManual("chose"));
+
+      input.addEventListener("input", (e) => {
+        P.address = e.target.value;
+        nextBtn.disabled = true;   // a typed string is not a confirmed address
+      });
+      nextBtn.disabled = true;
 
       loadMaps().then(() => google.maps.importLibrary("places")).then((places) => {
         if (places.PlaceAutocompleteElement) {
@@ -1069,44 +1153,50 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           slot.innerHTML = "";
           slot.appendChild(ac);
           manualWrap.hidden = false;
-          // Require a real selection: no lat/lng means no satellite image.
-          nextBtn.disabled = !state.place.lat;
-
           ac.addEventListener("gmp-select", (ev) => {
             const pred = ev.placePrediction;
             if (!pred) return;
             const place = pred.toPlace();
-            place.fetchFields({
-              fields: ["formattedAddress", "location", "addressComponents"]
-            }).then(() => {
-              const loc = place.location;
-              const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
-              const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
-              const comps = place.addressComponents || [];
-              const pc = comps.filter((c) => (c.types || []).indexOf("postal_code") > -1)[0];
-              accept(place.formattedAddress, lat, lng, pc ? (pc.shortText || pc.longText) : "");
-            }).catch(useManualInput);
+            place.fetchFields({ fields: ["formattedAddress", "location", "addressComponents"] })
+              .then(() => {
+                const loc = place.location;
+                const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
+                const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
+                const comps = place.addressComponents || [];
+                const pick = (type) => {
+                  const c = comps.filter((x) => (x.types || []).indexOf(type) > -1)[0];
+                  return c ? (c.shortText || c.longText) : "";
+                };
+                accept(place.formattedAddress, lat, lng, pick("postal_code"), pick("locality"));
+              })
+              .catch(() => toManual("failed"));
           });
 
         } else if (places.Autocomplete) {
-          // Legacy path, only reachable on accounts created before Mar 2025.
-          const input = slot.querySelector("input");
           const ac = new places.Autocomplete(input, {
-            types: ["address"],
-            componentRestrictions: { country: "us" },
+            types: ["address"], componentRestrictions: { country: "us" },
             fields: ["formatted_address", "address_components", "geometry"]
           });
+          manualWrap.hidden = false;
           ac.addListener("place_changed", () => {
             const p = ac.getPlace();
             if (!p || !p.geometry) return;
-            const pc = (p.address_components || [])
-              .filter((c) => c.types.indexOf("postal_code") > -1)[0];
+            const pick = (type) => {
+              const c = (p.address_components || []).filter((x) => x.types.indexOf(type) > -1)[0];
+              return c ? c.short_name : "";
+            };
             accept(p.formatted_address || input.value,
               p.geometry.location.lat(), p.geometry.location.lng(),
-              pc ? pc.short_name : "");
+              pick("postal_code"), pick("locality"));
           });
+        } else {
+          toManual("failed");
         }
-      }).catch(() => { /* no key or Maps blocked: typed address still works */ });
+      }).catch(() => {
+        // No key, blocked key, offline, or Google down. Go straight to the
+        // manual form rather than leaving a search box that cannot search.
+        toManual("failed");
+      });
     }
 
     /* --- Question --- */
