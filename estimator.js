@@ -1,16 +1,16 @@
 /* ============================================================================
-   CENVAR INSTANT ESTIMATE FUNNEL
+   CENVAR INSTANT ESTIMATE FUNNEL  —  now includes SOLAR
    ============================================================================
    Embed:  <div class="rfx-mount" data-service="roofing"></div>
            <script src="URL-OF-THIS-FILE" defer></script>
-   data-service: roofing | windows | doors | siding | hub
+   data-service: roofing | windows | doors | siding | solar | hub
+
+   BEFORE TESTING SOLAR: add "Solar" as an option on the estimator_service
+   dropdown in HubSpot, or every solar submission drops that field.
+
 
    After committing, purge or pages keep the old file:
      https://purge.jsdelivr.net/gh/ddavis-ctrl/cenvar-estimator@main/estimator.js
-
-   PASTE YOUR GOOGLE MAPS KEY into SETTINGS.google.mapsKey.
-   If Google is unavailable the address step falls back to manual entry, so a
-   Maps outage costs a photo, not a lead.
    ============================================================================ */
 
 (function () {
@@ -119,6 +119,31 @@ background:var(--rfx-line);margin-top:14px;aspect-ratio:16/9}
 .rfx-sat-tag{position:absolute;left:0;bottom:0;right:0;background:var(--rfx-scrim);color:var(--rfx-on-ink);
 font-size:14px;padding:9px 12px}
 
+/* --- dark price panel ---------------------------------------------------- */
+.rfx-panel{background:var(--rfx-panel);color:var(--rfx-on-panel);
+border-radius:var(--rfx-radius-card);padding:18px 20px;margin-bottom:14px}
+.rfx-panel-head{display:flex;align-items:center;gap:11px;margin-bottom:15px}
+.rfx-panel-thumb{width:46px;height:46px;flex:none;border-radius:8px;object-fit:cover;
+background:var(--rfx-panel-mute)}
+.rfx-panel-for{font-size:11px;color:var(--rfx-panel-mute)}
+.rfx-panel-addr{font-size:13px;color:var(--rfx-on-panel);white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis}
+.rfx-figs{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.rfx-fig{display:flex;flex-direction:column;gap:3px}
+.rfx-fig-hi{text-align:right}
+.rfx-fig-total{font-family:var(--rfx-display);font-weight:800;
+font-size:clamp(25px,6.6vw,34px);letter-spacing:-.035em;line-height:1.05}
+.rfx-fig-mo{font-family:var(--rfx-display);font-weight:800;font-size:15px;
+color:var(--rfx-pay);letter-spacing:-.01em;white-space:nowrap}
+.rfx-figs-to{font-size:14px;color:var(--rfx-panel-mute);padding-top:9px}
+.rfx-panel-rule{height:4px;width:64px;background:var(--rfx-accent);
+border-radius:2px;margin-top:14px}
+.rfx-stats{display:flex;gap:8px;margin-bottom:16px}
+.rfx-stat{flex:1;background:var(--rfx-card);border:1px solid var(--rfx-line);
+border-radius:var(--rfx-radius-card);padding:13px 8px;text-align:center}
+.rfx-stat-n{font-family:var(--rfx-display);font-weight:800;font-size:19px;
+color:var(--rfx-accent);letter-spacing:-.02em}
+.rfx-stat-t{font-size:11px;color:var(--rfx-ink-2);margin-top:4px;line-height:1.35}
 .rfx-range{background:var(--rfx-card);border:1px solid var(--rfx-line);border-radius:var(--rfx-radius-card);
 padding:26px 24px 24px;margin-bottom:20px}
 .rfx-range-nums{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
@@ -131,6 +156,10 @@ background:linear-gradient(90deg,var(--rfx-accent-deep),var(--rfx-accent))}
 .rfx-break-row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;font-size:15px}
 .rfx-break-k{color:var(--rfx-ink-2)}
 .rfx-break-v{font-family:var(--rfx-display);font-weight:600;white-space:nowrap}
+.rfx-pay{text-align:center;font-size:16px;color:var(--rfx-ink);margin:-6px 0 6px}
+.rfx-pay strong{font-family:var(--rfx-display);font-weight:800}
+.rfx-disclosure{font-size:11px;line-height:1.5;color:var(--rfx-mute);text-align:center;
+max-width:56ch;margin:0 auto 18px}
 .rfx-note{background:var(--rfx-card);border-left:4px solid var(--rfx-accent);padding:15px 17px;
 font-size:15px;color:var(--rfx-ink-2);margin-bottom:22px}
 .rfx-recap{border-top:1px solid var(--rfx-line);margin-bottom:22px}
@@ -254,6 +283,12 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     // as confirmation rather than as another call to action competing with the
     // red button. Change to null to fall back to the accent colour.
     selected:    "#056A38",
+    // The price panel. Dark so the figure carries weight against the page.
+    panel:       "#212121",
+    onPanel:     "#FFFFFF",
+    // Monthly payment, on the panel. Contrasting so the payment and the total
+    // read as equally important rather than one being a footnote.
+    payAccent:   "#F8CB0E",
     green:       "#056A38",
     red:         "#B42525",
 
@@ -333,6 +368,10 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       "--rfx-surface":     B.surface,
       "--rfx-card":        B.card       || W,
       "--rfx-selected":    B.selected   || B.accent,
+      "--rfx-panel":       B.panel      || B.ink,
+      "--rfx-on-panel":    B.onPanel    || "#FFFFFF",
+      "--rfx-panel-mute":  mix(B.panel || B.ink, W, 0.48),
+      "--rfx-pay":         B.payAccent  || B.accent,
       "--rfx-tint":        B.tint       || mix(B.selected || B.accent, W, 0.93),
       "--rfx-on-ink":      B.onInk      || W,
       "--rfx-scrim":       "rgba(" + hexToRgb(B.ink).join(",") + ",.88)",
@@ -405,7 +444,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       roofing: "/lander-roofing-estimate",
       windows: "/lander-windows-estimate",
       doors:   "/lander-doors-estimate",
-      siding:  "/lander-siding-estimate"
+      siding:  "/lander-siding-estimate",
+      solar:   "/lander-solar-estimate"   // TODO: create this page
     },
     // Pulled from cenvarroofing.com. Edit if any of it is stale.
     company: {
@@ -431,8 +471,17 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       // at the call, rather than apologising for not being exact.
       priceCaveat: "This is what work like yours typically costs. A free measurement " +
         "gives you the exact number, with no pressure to book.",
-      // Shown on the price screen as a credibility line.
-      trustLine: "Owens Corning Platinum Preferred · 9,400+ reviews averaging 4.9 stars"
+      // Default credibility line. Any service can override it with its own
+      // `trustLine`. A manufacturer credential only belongs on the trade it
+      // applies to, so Owens Corning lives on roofing and nowhere else.
+      trustLine: "4.9 stars across 9,400+ reviews · BBB A+ rated",
+
+      // Three tiles under the call button. Set to [] to hide the row.
+      stats: [
+        { n: "15,000+", t: "jobs completed" },
+        { n: "9,400+",  t: "reviews" },
+        { n: "2+",      t: "decades serving neighbors" }
+      ]
     },
 
     // Header images. Upload to Webflow assets and paste the URLs into each
@@ -443,6 +492,101 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     //   "none"   no banners, even if URLs are set.
     imageOn: "first",
     imageRatio: "21 / 9",        // wide banner; "16 / 9" if you want it taller
+
+    /* =======================================================================
+       FINANCING  —  Service Finance Company
+       -----------------------------------------------------------------------
+       DISABLED until every field below is filled in from your SFC rate card.
+       Leave `enabled` false and no payment line appears anywhere.
+
+       This is built to quote a WELL QUALIFIED BUYER: best tier, longest term,
+       lowest payment. That is a normal way to advertise, but it makes the
+       disclosure obligatory rather than decorative.
+
+       Under Regulation Z, stating a monthly payment is a "triggering term".
+       Once a payment appears, the advertisement must also state the amount or
+       percentage of any downpayment, the terms of repayment, and the annual
+       percentage rate using that phrase. Get the exact wording from SFC's
+       compliance team and paste it into `disclosure` below. Do not write it
+       yourself and do not shorten theirs.
+       ======================================================================= */
+    /* =======================================================================
+       FINANCING  —  Service Finance Company
+       -----------------------------------------------------------------------
+       Plans transcribed from the SFC residential rate sheet. `active` picks
+       which one the funnel quotes. #4107 is the longest term and therefore
+       the lowest monthly payment, which is the well-qualified-buyer framing.
+
+       Payments use SFC's own payment factor rather than a calculated
+       amortisation, so the funnel quotes exactly what your rate sheet does.
+
+       SOLAR IS SEPARATE and stays off until those rates arrive.
+
+       Regulation Z: a stated payment is a triggering term. The disclosure
+       below is required, not decorative, and must come from SFC.
+       ======================================================================= */
+    financing: {
+      enabled: true,
+
+      plans: {
+        // SFC confirmed 9.99 is both the interest rate and the APR: there are
+        // no fees financed into the loan, so the two are identical. It is the
+        // STARTING rate, meaning the best tier rather than what every buyer
+        // gets, which is why the disclosure qualifies it.
+        "4107": { label: "Plan #4107", rate: 9.99, apr: 9.99, months: 180,
+                  factor: 0.0107, min: 3000, max: 100000, rateIsStarting: true },
+        "4132": { label: "Plan #4132", rate: 9.99, months: 120, factor: 0.0132,
+                  min: 3000, max: 100000 },
+        "4202": { label: "Plan #4202", rate: 7.99, months: 60,  factor: 0.0202,
+                  min: 1000, max: 100000 },
+        // Deferred and same-as-cash plans have no meaningful monthly figure to
+        // advertise, so they are here for reference only.
+        "1006": { label: "Plan #1006", rate: null, months: 6,  factor: null,
+                  min: 500,  max: 100000, note: "deferred interest" },
+        "1018": { label: "Plan #1018", rate: null, months: 18, factor: null,
+                  min: 1000, max: 100000, note: "deferred interest" },
+        "2012": { label: "Plan #2012", rate: 0,    months: 12, factor: null,
+                  min: 1000, max: 100000, note: "zero interest, same as cash" }
+      },
+
+      // Which plan each service quotes. null means no payment is shown.
+      /* Every service quotes the 180 month plan. It is the longest term and
+         therefore the lowest monthly payment, which is what we advertise.
+         The shorter plans stay in `plans` for reference only. If you ever
+         switch one, the disclosure follows automatically. */
+      byService: {
+        roofing: "4107", windows: "4107", doors: "4107", siding: "4107",
+        solar:   null      // awaiting the solar rate sheet
+      },
+
+      downPayment: 0,
+
+      // If SFC's dealer fee means financed jobs are priced above cash,
+      // set this above 1.0 so payments come off the financed price.
+      priceFactor: 1.0,
+
+      /* REQUIRED once payments are shown. Send this to SFC for approval
+         before launch; it is drafted, not certified.
+
+         {months} and {rate} are filled from whichever plan is active, so the
+         disclosure can never describe a different term to the one being
+         quoted. Do not hard-code the numbers back in.
+
+         OUTSTANDING: the rate sheet says "interest rate". Regulation Z
+         requires the ANNUAL PERCENTAGE RATE. If SFC's fees make the APR
+         higher than 9.99%, add an `apr` to the plan and this line will use
+         it instead of the interest rate. */
+      disclosure:
+        "Estimated monthly payment is for well qualified buyers with approved " +
+        "credit and assumes financing of the full estimated amount with $0 down, " +
+        "repaid over {months} months at an annual percentage rate of {rate}%. That " +
+        "is our lowest available rate; rates start there and increase based on " +
+        "creditworthiness, so your payment may be higher. Payment shown is an " +
+        "estimate based on a preliminary price range, not a final quote or an offer " +
+        "of credit. Actual rate, term, and payment depend on creditworthiness, final " +
+        "project cost, and lender approval. Financing provided by Service Finance " +
+        "Company, LLC. Subject to credit approval. Minimum amount financed {min}."
+    },
 
     bookingUrl: "",              // TODO: HubSpot meetings link
     tracking: { adsConversionId: null },   // TODO: e.g. "AW-123456789/AbC-D_efGh"
@@ -522,10 +666,68 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
              high: Math.max.apply(null, list.map((x) => x[1])) };
   }
 
+  /* =========================================================================
+     SOLAR PRICING
+     -------------------------------------------------------------------------
+     Unlike the other four trades, solar is calculated rather than looked up.
+     Bill -> annual kWh -> system size -> price per watt. Every assumption is
+     here; change one and every solar quote moves.
+
+     NOTE ON INCENTIVES: the 30% federal residential credit (IRC 25D) ended on
+     31 Dec 2025. Homeowners buying with cash or a loan get nothing federally,
+     so no credit is netted off and none should be mentioned in the copy.
+     ========================================================================= */
+  const SOLAR = {
+    /* -----------------------------------------------------------------------
+       Fitted from 101 real Cenvar jobs, segmented by mount and battery.
+       Cost is linear in system size: a dollars-per-kW slope plus a fixed
+       amount for permitting, design and mobilisation that does not scale.
+
+         roof    $2,523/kW + $4,456     R2 0.87   (80 jobs)
+         ground  $3,122/kW +   $473     R2 0.92   ( 9 jobs, treat as provisional)
+
+       The band multipliers capture roughly 70% of past jobs. Widen them to
+       catch more, at the cost of a range customers find less useful.
+    ----------------------------------------------------------------------- */
+    fit: {
+      roof:   { perKw: 2523, fixed: 4456, lo: 0.86, hi: 1.11 },
+      ground: { perKw: 3122, fixed: 473,  lo: 0.83, hi: 1.12 }
+    },
+
+    /* Bill to system size, fitted on the same 101 jobs:
+         kW = 0.0316 x bill + 3.47      R2 0.49
+       The R2 is low because two households with the same bill routinely buy
+       very different systems. That is real customer choice, not measurement
+       error, and it is why the quote band cannot be narrow. */
+    size: { perDollar: 0.0316, base: 3.47 },
+
+    /* The sizing curve is an average across roofs that were sunny and shaded
+       alike, so shade is applied as a symmetric nudge around it rather than a
+       one-way derate. A one-way derate on top of an averaged curve would bias
+       every quote upward. */
+    shade: { full: 0.96, partial: 1.12 },
+
+    cap: { roof: 25, ground: 25 },
+
+    /* FranklinWH aPower 2, installed. Confirmed against three jobs: remove
+       these amounts and the remaining solar lands inside the roof band. */
+    battery: { none: 0, kwh15: 17500, kwh30: 30000 },
+
+    /* Midpoint of each bill bucket. Virginia households average $146-$177 a
+       month at 15-17 cents per kWh, which is why the second bucket is flagged
+       as typical on screen. */
+    bill: { u100: 75, b100: 137, b175: 212, b250: 300, o350: 475 },
+
+    /* Direct-size path, for customers who already know what they want. */
+    kwRange: { min: 4, max: 30, start: 10, step: 1 },
+    wattsPerPanel: 450
+  };
+
   const SERVICES = {
     roofing: {
       label: "Roofing", hubNote: "Shingle, corrugated, or standing seam",
       intro: "Get your roof price in about a minute",
+      trustLine: "Owens Corning Platinum Preferred · 4.9 stars across 9,400+ reviews",
       // "street" uses Street View and falls back to satellite where Google
       // has no imagery. "satellite" always uses the overhead view.
       view: "satellite",   // overhead shows the roof planes and dormers
@@ -785,6 +987,114 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       }
     },
 
+    solar: {
+      label: "Solar", hubNote: "Roof and ground mounted systems",
+      intro: "Get your solar price in about a minute",
+      view: "satellite",
+      image: "", hubImage: "", imageAlt: "A Cenvar solar installation",
+
+      questionsFor(a) {
+        const q = [{
+          id: "bill", heading: "What is your average monthly electric bill?", cols: 1,
+          caption: "Most Virginia homes pay $146 to $177 a month, at 15 to 17 cents " +
+                   "per kilowatt hour. Summer bills run higher, so a yearly average " +
+                   "is best if you have one.",
+          options: [
+            { v: "u100", t: "Under $100" },
+            { v: "b100", t: "$100 to $175", n: "Where most Virginia homes land" },
+            { v: "b175", t: "$175 to $250" },
+            { v: "b250", t: "$250 to $350" },
+            { v: "o350", t: "Over $350" },
+            { v: "known", t: "I already know what size system I want",
+              n: "Skip ahead and enter the kilowatts" } ]
+        }];
+        if (!a.bill) return q;
+
+        if (a.bill === "known") {
+          q.push({ id: "kw", type: "stepper", heading: "How big a system?",
+            min: SOLAR.kwRange.min, max: SOLAR.kwRange.max,
+            start: SOLAR.kwRange.start, step: SOLAR.kwRange.step, unit: "kW",
+            caption: "Panels are about " + SOLAR.wattsPerPanel + " watts each, so a " +
+                     "10 kW system is roughly " +
+                     Math.round(10000 / SOLAR.wattsPerPanel) + " panels.",
+            quick: [6, 10, 15, 20] });
+        }
+
+        q.push({ id: "mount", heading: "Where would the panels go?", cols: 1, options: [
+          { v: "roof",   t: "On my roof" },
+          { v: "ground", t: "On the ground", n: "You have open land to use" },
+          { v: "unsure", t: "Not sure yet", n: "We will price both" } ] });
+        if (!a.mount) return q;
+
+        // Shade only affects a roof array, and only when sizing from a bill.
+        if (a.mount !== "ground" && a.bill !== "known") {
+          q.push({ id: "shade", heading: "How much sun does your roof get?", cols: 1, options: [
+            { v: "full",    t: "Full sun most of the day" },
+            { v: "partial", t: "Partial shade", n: "Trees or a neighbouring roof" } ] });
+        }
+        if (a.mount !== "ground") {
+          q.push({ id: "roofAge", heading: "How old is your roof?", cols: 1, options: [
+            { v: "u10",    t: "Under 10 years" },
+            { v: "b1020",  t: "10 to 20 years" },
+            { v: "o20",    t: "Over 20 years", n: "Worth replacing before panels go on" },
+            { v: "unsure", t: "Not sure" } ] });
+        }
+        q.push({ id: "battery", heading: "Add battery backup?", cols: 1,
+          caption: "A battery keeps your home running when the grid goes down. " +
+                   "It is a significant addition to the cost.",
+          options: [
+            { v: "none",  t: "No battery" },
+            { v: "kwh15", t: "15 kWh", n: "Runs essentials through an outage" },
+            { v: "kwh30", t: "30 kWh", n: "Covers more of the home for longer" } ] });
+        return q;
+      },
+
+      sizeFor(a, mount) {
+        if (a.bill === "known") return Math.min(Number(a.kw) || SOLAR.kwRange.start,
+                                                SOLAR.cap[mount]);
+        const bill = SOLAR.bill[a.bill];
+        if (!bill) return 0;
+        let kw = SOLAR.size.perDollar * bill + SOLAR.size.base;
+        if (mount === "roof") kw *= SOLAR.shade[a.shade || "full"];
+        return Math.min(kw, SOLAR.cap[mount]);
+      },
+
+      price(a) {
+        if (!a.bill || !a.mount || !a.battery) return null;
+        if (a.bill === "known" && !a.kw) return null;
+        const adder = SOLAR.battery[a.battery] || 0;
+
+        const line = (mount) => {
+          const f = SOLAR.fit[mount];
+          const kw = this.sizeFor(a, mount);
+          const mid = f.perKw * kw + f.fixed;
+          return {
+            label: mount === "roof" ? "Roof mounted" : "Ground mounted",
+            kw: kw,
+            low:  mid * f.lo + adder,
+            high: mid * f.hi + adder
+          };
+        };
+
+        const note = a.bill === "known"
+          ? ""
+          : "Sized from your bill. The exact system depends on your roof, " +
+            "which we confirm on site.";
+
+        if (a.mount === "unsure") {
+          const rows = [line("roof"), line("ground")];
+          return {
+            low: Math.min(rows[0].low, rows[1].low),
+            high: Math.max(rows[0].high, rows[1].high),
+            breakdown: rows.map((r) => ({ label: r.label, low: r.low, high: r.high })),
+            note: note
+          };
+        }
+        const r = line(a.mount);
+        return { low: r.low, high: r.high, note: note };
+      }
+    },
+
     siding: {
       label: "Siding", hubNote: "Vinyl and insulated vinyl",
       intro: "Get your siding price in about a minute",
@@ -834,12 +1144,37 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
      ========================================================================= */
   const round = (n) => Math.round(n / SETTINGS.roundTo) * SETTINGS.roundTo;
   const money = (n) => "$" + round(n).toLocaleString("en-US");
+  // Monthly payments round to the dollar. Using the $50 rounding meant $241
+  // displayed as $250, which is both wrong and needlessly generous-looking.
+  const moneyExact = (n) => "$" + Math.round(n).toLocaleString("en-US");
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const cookie = (n) => {
     const m = document.cookie.match("(^|;)\\s*" + n + "\\s*=\\s*([^;]+)");
     return m ? m.pop() : "";
   };
+  // Standard amortising payment. Returns null when financing is off, the
+  // figures are missing, or the amount falls outside what SFC will lend.
+  function planFor(serviceId) {
+    const F = SETTINGS.financing;
+    if (!F || !F.enabled) return null;
+    const key = F.byService ? F.byService[serviceId] : null;
+    if (!key) return null;
+    const p = F.plans ? F.plans[key] : null;
+    return (p && p.factor) ? p : null;   // no factor, no advertisable payment
+  }
+
+  // SFC quotes from a payment factor, so the funnel does too. Returns null
+  // when the amount falls outside what this plan will lend.
+  function monthlyPayment(amount, serviceId) {
+    const F = SETTINGS.financing;
+    const p = planFor(serviceId);
+    if (!p) return null;
+    const principal = amount * (F.priceFactor || 1) - (F.downPayment || 0);
+    if (principal < p.min || principal > p.max) return null;
+    return principal * p.factor;
+  }
+
   function track(name, params) {
     try {
       if (typeof window.gtag === "function") window.gtag("event", name, params || {});
@@ -1041,7 +1376,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           '</div>';
       }
 
-      stage.innerHTML = heroMark("address") +
+      // Once we have a photo of their actual house, drop the stock banner.
+      // Two large images stacked is too much, and theirs is the interesting one.
+      stage.innerHTML = (P.lat ? "" : heroMark("address")) +
         '<p class="rfx-kicker">' + iconMark() + esc(S.label) + '</p>' +
         '<h2 class="rfx-h">Where is your home?</h2>' +
         photo +
@@ -1216,17 +1553,19 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           '</div>' +
           '<p class="rfx-step-cap">' + esc(qq.caption || "") + '</p>' +
           '<div class="rfx-quick">' + (qq.quick || []).map((n) =>
-            '<button type="button" data-n="' + n + '">' + n + ' windows</button>').join("") + '</div>';
+            '<button type="button" data-n="' + n + '">' + n + " " +
+            esc(qq.unit || "windows") + '</button>').join("") + '</div>';
 
         const out = q(".rfx-step-val"), minus = q(".rfx-minus"), plus = q(".rfx-plus");
         const paint = () => {
-          out.textContent = state.answers[qq.id];
+          out.textContent = state.answers[qq.id] + (qq.unit ? " " + qq.unit : "");
           minus.disabled = state.answers[qq.id] <= qq.min;
           plus.disabled = state.answers[qq.id] >= qq.max;
         };
         const set = (n) => { state.answers[qq.id] = Math.min(qq.max, Math.max(qq.min, n)); paint(); };
-        minus.addEventListener("click", () => set(state.answers[qq.id] - 1));
-        plus.addEventListener("click", () => set(state.answers[qq.id] + 1));
+        const stepBy = qq.step || 1;
+        minus.addEventListener("click", () => set(state.answers[qq.id] - stepBy));
+        plus.addEventListener("click", () => set(state.answers[qq.id] + stepBy));
         q(".rfx-quick").addEventListener("click", (e) => {
           const b = e.target.closest("button[data-n]");
           if (b) set(Number(b.dataset.n));
@@ -1237,7 +1576,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       }
 
       const cls = qq.cols === 3 ? " rfx-three" : qq.cols === 2 ? " rfx-two" : "";
-      stage.innerHTML = head + '<div class="rfx-options' + cls + '">' +
+      const cap = qq.caption
+        ? '<p class="rfx-sub" style="margin-top:-8px">' + esc(qq.caption) + '</p>' : "";
+      stage.innerHTML = head + cap + '<div class="rfx-options' + cls + '">' +
         qq.options.map((o) =>
           '<button type="button" class="rfx-opt' + (state.answers[qq.id] === o.v ? " is-on" : "") +
           '" data-v="' + o.v + '"><span class="rfx-opt-tick"></span><span class="rfx-opt-body">' +
@@ -1321,7 +1662,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     }
 
     function answerText(qq) {
-      if (qq.type === "stepper") return String(state.answers[qq.id]);
+      if (qq.type === "stepper") return String(state.answers[qq.id]) + (qq.unit ? " " + qq.unit : "");
       const o = (qq.options || []).find((x) => x.v === state.answers[qq.id]);
       return o ? o.t : "—";
     }
@@ -1474,6 +1815,27 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       });
     }
 
+    // "or about $327 to $413 a month" plus the required disclosure.
+    // Renders nothing unless financing is configured AND this service is on
+    // the list AND the amount is inside SFC's lending limits.
+    // The payment figures now sit on the panel beside their totals, so this
+    // renders only the Regulation Z disclosure that must accompany them.
+    // Fills {months}, {rate} and {min} from the plan actually being quoted,
+    // so the disclosure and the payment can never drift apart.
+    function disclosureBlock() {
+      const F = SETTINGS.financing;
+      const p = planFor(serviceId);
+      if (!F.disclosure) {
+        return '<p class="rfx-disclosure" style="color:var(--rfx-red)">DISCLOSURE ' +
+          'MISSING. Add SETTINGS.financing.disclosure before this goes live.</p>';
+      }
+      const text = F.disclosure
+        .replace(/\{months\}/g, p ? p.months : "")
+        .replace(/\{rate\}/g, p ? (p.apr != null ? p.apr : p.rate) : "")
+        .replace(/\{min\}/g, p ? "$" + p.min.toLocaleString("en-US") : "");
+      return '<p class="rfx-disclosure">' + esc(text) + '</p>';
+    }
+
     function renderPrice() {
       // In preview there is no contact step, so the price is worked out here.
       if (PREVIEW) state.result = S.price(state.answers);
@@ -1506,22 +1868,63 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
             (b.plus ? "+" : "") + '</span></div>').join("") + '</div>'
         : "";
 
+      // Monthly payment sits directly under its own total, in the contrasting
+      // colour, so the payment and the price carry comparable weight.
+      // Both ends must be financeable. Showing a payment on the high end of a
+      // quote whose low end is below the loan minimum would be misleading.
+      const payLow = monthlyPayment(r.low, serviceId);
+      const payHigh = monthlyPayment(r.high, serviceId);
+      const showPay = !!(payLow && payHigh);
+      const mo = (v) => showPay && v
+        ? '<span class="rfx-fig-mo">' + moneyExact(v) + '/mo</span>' : "";
+
+      // Small photo of their own home, reusing whatever we already fetched.
+      const thumb = state.place.lat
+        ? '<img class="rfx-panel-thumb" alt="" src="' +
+          (S.view === "street" ? streetViewUrl(state.place.lat, state.place.lng)
+                               : satelliteUrl(state.place.lat, state.place.lng)) + '">'
+        : "";
+
+      const statRow = (C.stats && C.stats.length)
+        ? '<div class="rfx-stats">' + C.stats.map((s) =>
+            '<div class="rfx-stat"><div class="rfx-stat-n">' + esc(s.n) + '</div>' +
+            '<div class="rfx-stat-t">' + esc(s.t) + '</div></div>').join("") + '</div>'
+        : "";
+
       stage.innerHTML = logoMark() +
-        '<h2 class="rfx-h">' + iconMark() + 'Your ' + esc(S.label.toLowerCase()) + ' estimate</h2>' +
-        '<p class="rfx-sub">Based on what you told us about ' +
-        esc(state.place.address || "your home") + '.</p>' +
-        '<div class="rfx-range"><div class="rfx-range-nums">' +
-        '<span class="rfx-num" data-to="' + Math.round(r.low) + '">' + money(r.low) + '</span>' +
-        '<span class="rfx-range-dash">to</span>' +
-        '<span class="rfx-num" data-to="' + Math.round(r.high) + '" data-suffix="' + plus + '">' +
-        money(r.high) + plus + '</span></div>' +
-        '<div class="rfx-range-bar"></div>' +
-        '<div class="rfx-range-cap"><span>Typical low</span><span>Typical high</span></div>' +
-        breakdown + '</div>' + recap +
-        '<div class="rfx-note"><strong>' + esc(C.reassurance) + '</strong><br>' +
-        esc(C.priceCaveat) + '</div>' +
-        (C.trustLine ? '<p class="rfx-fine" style="margin:0 0 18px">' +
-          esc(C.trustLine) + '</p>' : "") + cta;
+        '<p class="rfx-kicker">' + iconMark() + esc(S.label) + '</p>' +
+        '<h2 class="rfx-h">Your ' + esc(S.label.toLowerCase()) + ' estimate</h2>' +
+
+        '<div class="rfx-panel">' +
+          (state.place.address
+            ? '<div class="rfx-panel-head">' + thumb +
+              '<div style="min-width:0"><div class="rfx-panel-for">Your estimate for</div>' +
+              '<div class="rfx-panel-addr">' + esc(state.place.address) + '</div></div></div>'
+            : "") +
+          '<div class="rfx-figs">' +
+            '<span class="rfx-fig">' +
+              '<span class="rfx-fig-total rfx-num" data-to="' + Math.round(r.low) + '">' +
+              money(r.low) + '</span>' + mo(payLow) +
+            '</span>' +
+            '<span class="rfx-figs-to">to</span>' +
+            '<span class="rfx-fig rfx-fig-hi">' +
+              '<span class="rfx-fig-total rfx-num" data-to="' + Math.round(r.high) +
+              '" data-suffix="' + plus + '">' + money(r.high) + plus + '</span>' +
+              mo(payHigh) +
+            '</span>' +
+          '</div>' +
+          '<div class="rfx-panel-rule"></div>' +
+        '</div>' +
+
+        (breakdown ? '<div class="rfx-range">' + breakdown + '</div>' : "") +
+        (showPay ? disclosureBlock() : "") +
+        (r.note ? '<div class="rfx-note">' + esc(r.note) + '</div>' : "") + recap +
+        '<div class="rfx-note"><strong>' + esc(C.reassurance) + '</strong> ' +
+        esc(C.priceCaveat) + '</div>' + cta + statRow +
+        (function () {
+          const line = S.trustLine || C.trustLine;
+          return line ? '<p class="rfx-fine rfx-center">' + esc(line) + '</p>' : "";
+        })();
       revealPrice();
       wireCall();
     }
@@ -1612,7 +2015,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     roofing: ["roofing", "roof"],
     windows: ["window"],
     doors:   ["door"],
-    siding:  ["siding"]
+    siding:  ["siding"],
+    solar:   ["solar"]
   };
 
   function detectService() {
