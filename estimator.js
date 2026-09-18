@@ -1681,6 +1681,19 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         (r ? "\nEstimate: " + money(r.low) + " to " + money(r.high) + (r.plus ? "+" : "")
            : "\nEstimate: not priced online, needs a call");
 
+      const attrSrc = (function () {
+        const svc = S.label || "Estimator";
+        const qs = (window.location.search || "").toLowerCase();
+        const u = (re) => re.test(qs);
+        const meta = u(/[?&]fbclid=/) || !!cookie("_fbc") ||
+          u(/[?&]utm_source=(facebook|fb|meta|instagram|ig)(&|$)/) || u(/[?&]utm_medium=[^&]*paid.?social/);
+        const gads = u(/[?&](gclid|gbraid|wbraid)=/) || !!cookie("_gcl_aw") ||
+          (u(/[?&]utm_source=(google|adwords)(&|$)/) && u(/[?&]utm_medium=[^&]*(cpc|ppc|paid)/));
+        const bing = u(/[?&]msclkid=/) || u(/[?&]utm_source=(bing|microsoft)(&|$)/);
+        const channel = meta ? "Meta" : gads ? "Google Ads" : bing ? "Bing Paid Ads" : null;
+        return channel ? channel + " - Cenvar Estimator - " + svc : "";
+      })();
+
       const pairs = [
         [P.firstName, parts[0]], [P.lastName, parts.slice(1).join(" ")],
         [P.email, c.email], [P.phone, c.phone],
@@ -1688,8 +1701,10 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         [P.service, S.label],
         [P.estimateLow, r ? String(round(r.low)) : ""],
         [P.estimateHigh, r ? String(round(r.high)) : ""],
-        [P.details, details]
+        [P.details, details],
+        [P.attributionSource, attrSrc]
       ].filter((p) => p[0] && p[1]);
+
 
       // If the GUID is not configured yet, do not strand the customer on a
       // failed send. Warn in the console and let them through to the price.
