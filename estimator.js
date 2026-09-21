@@ -1683,16 +1683,21 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
       const attrSrc = (function () {
         const svc = S.label || "Estimator";
-        const qs = (window.location.search || "").toLowerCase();
-        const u = (re) => re.test(qs);
-        const meta = u(/[?&]fbclid=/) || !!cookie("_fbc") ||
-          u(/[?&]utm_source=(facebook|fb|meta|instagram|ig)(&|$)/) || u(/[?&]utm_medium=[^&]*paid.?social/);
-        const gads = u(/[?&](gclid|gbraid|wbraid)=/) || !!cookie("_gcl_aw") ||
-          (u(/[?&]utm_source=(google|adwords)(&|$)/) && u(/[?&]utm_medium=[^&]*(cpc|ppc|paid)/));
-        const bing = u(/[?&]msclkid=/) || u(/[?&]utm_source=(bing|microsoft)(&|$)/);
+        let sig = {};
+        try {
+          const m = document.cookie.match(/(?:^|;\s*)cenvar_attr=([^;]+)/);
+          if (m) sig = JSON.parse(decodeURIComponent(m[1]));
+        } catch (e) {}
+        const q = new URLSearchParams(window.location.search);
+        const g = (k) => String(sig[k] || q.get(k) || "").toLowerCase();
+        const us = g("utm_source"), um = g("utm_medium");
+        const meta = !!g("fbclid") || /facebook|fb|meta|instagram|ig/.test(us) || /paid.?social/.test(um);
+        const gads = !!(g("gclid") || g("gbraid") || g("wbraid")) || (/google|adwords/.test(us) && /cpc|ppc|paid/.test(um));
+        const bing = !!g("msclkid") || /bing|microsoft/.test(us);
         const channel = meta ? "Meta" : gads ? "Google Ads" : bing ? "Bing Paid Ads" : null;
         return channel ? channel + " - Cenvar Estimator - " + svc : "";
       })();
+
 
       const pairs = [
         [P.firstName, parts[0]], [P.lastName, parts.slice(1).join(" ")],
