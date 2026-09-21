@@ -425,7 +425,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         // unprefixed ones would make that worse.
         service: "estimator_service",
         estimateLow: "estimator_low_estimate", estimateHigh: "estimator_high_estimate",
-        details: "estimator_details"
+        details: "estimator_details",
+        attributionSource: "attribution_source"
       }
     },
     google: {
