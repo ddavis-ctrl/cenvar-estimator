@@ -79,6 +79,11 @@ padding:15px 16px;cursor:pointer;transition:border-color .14s ease,background .1
 .rfx-opt-body{flex:1;min-width:0}
 .rfx-opt-title{display:block;font-weight:600}
 .rfx-opt-note{display:block;font-size:14px;color:var(--rfx-mute);margin-top:2px}
+.rfx-opt.rfx-opt-sub{padding:10px 16px;font-size:15px;opacity:.7;border-left-color:var(--rfx-line-2)}
+.rfx-opt.rfx-opt-sub .rfx-opt-title{font-weight:500}
+.rfx-opt.rfx-opt-sub .rfx-opt-note{font-size:13px}
+.rfx-opt.rfx-opt-sub:hover,.rfx-opt.rfx-opt-sub.is-on{opacity:1}
+.rfx-opt.rfx-opt-sub.is-on{border-left-color:var(--rfx-selected)}
 .rfx-opt-tick{width:19px;height:19px;flex:none;border:1px solid var(--rfx-line-2);border-radius:50%;position:relative}
 .rfx-opt.is-on .rfx-opt-tick{border-color:var(--rfx-selected);background:var(--rfx-selected)}
 .rfx-opt.is-on .rfx-opt-tick::after{content:"";position:absolute;left:6px;top:3px;width:4px;
@@ -788,10 +793,15 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         { id: "count", type: "stepper", heading: "How many windows?", min: 1, max: 50, start: 8,
           caption: "A close count is fine. We measure exactly on site.",
           quick: [4, 8, 12, 20] },
-        { id: "material", heading: "What frame material?", cols: 1, options: [
+        // Option titles are deliberately unchanged. They are written verbatim
+        // into the HubSpot "Estimator: Details" property, so altering them
+        // would split reporting against every record collected so far.
+        { id: "material", heading: "Which frame material would you like?", cols: 1,
+          caption: "The material we would install - not what you have now.",
+          options: [
           { v: "vinyl",    t: "Vinyl",           n: "Best value" },
           { v: "woodclad", t: "Wood-clad vinyl", n: "Premium look" },
-          { v: "unsure",   t: "Not sure yet",    n: "We will show you both" } ] },
+          { v: "unsure",   t: "Not sure yet",    n: "We will price vinyl", sub: true } ] },
         { id: "condition", heading: "How are the existing frames?", cols: 1, options: [
           { v: "none", t: "Solid",                 n: "Just old glass or sashes" },
           { v: "wear", t: "Some wear" },
@@ -805,8 +815,19 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
             const b = PRICES.windows[m + "|" + a.condition][i];
             return { label: label[m], low: b[0], high: b[1] };
           });
-          const s = span(rows.map((r) => [r.low, r.high]));
-          return { low: s.low, high: s.high, breakdown: rows };
+          // Headline the vinyl figure rather than spanning both products.
+          // Spanning gave a 3.15x range (a typical 12-window job read
+          // $7,800-$24,600) and a $84-$264/mo payment, which reads as
+          // "we have no idea". Vinyl is the value product and the one most
+          // customers land on, so it is the honest default for someone who
+          // has not chosen yet. The wood-clad row stays in the breakdown as
+          // the upgrade path, so nothing is hidden - picking it later is an
+          // upsell from a known number, not a correction to a bad one.
+          const v = rows[0];
+          return {
+            low: v.low, high: v.high, breakdown: rows,
+            note: "Priced on standard vinyl. Wood-clad is shown above if you would like to upgrade."
+          };
         }
         const b = PRICES.windows[a.material + "|" + a.condition][i];
         return { low: b[0], high: b[1] };
@@ -1582,6 +1603,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       stage.innerHTML = head + cap + '<div class="rfx-options' + cls + '">' +
         qq.options.map((o) =>
           '<button type="button" class="rfx-opt' + (state.answers[qq.id] === o.v ? " is-on" : "") +
+          (o.sub ? " rfx-opt-sub" : "") +
           '" data-v="' + o.v + '"><span class="rfx-opt-tick"></span><span class="rfx-opt-body">' +
           '<span class="rfx-opt-title">' + esc(o.t) + '</span>' +
           (o.n ? '<span class="rfx-opt-note">' + esc(o.n) + '</span>' : "") +
