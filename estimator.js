@@ -113,6 +113,28 @@ background:var(--rfx-card);border:1px solid var(--rfx-line-2);border-radius:var(
 .rfx-input:focus{outline:2px solid var(--rfx-ink);outline-offset:-1px;border-color:var(--rfx-ink)}
 .rfx-input.is-bad{border-color:var(--rfx-red)}
 .rfx-err{font-size:14px;color:var(--rfx-red);margin-top:5px}
+/* --- gated price preview -------------------------------------------------
+   The figures are the REAL ones. Two blur techniques are stacked on purpose:
+   the filter property is the crisp one, and transparent text with a coloured
+   shadow is the fallback, because a browser that silently ignores filter
+   would otherwise render the price in full. Belt and braces on the one
+   element whose whole job is to not be readable. */
+.rfx-teaser{background:var(--rfx-panel);color:var(--rfx-on-panel);
+border-radius:var(--rfx-radius-card);padding:18px 20px;margin-bottom:20px;
+position:relative;overflow:hidden}
+.rfx-teaser .rfx-panel-head{margin-bottom:13px}
+.rfx-teaser-figs{display:flex;align-items:flex-start;justify-content:space-between;
+gap:10px;user-select:none}
+.rfx-blur{color:transparent!important;text-shadow:0 0 13px rgba(255,255,255,.72);
+filter:blur(7px);-webkit-filter:blur(7px)}
+.rfx-teaser-mo .rfx-blur{text-shadow:0 0 9px rgba(248,203,14,.75);filter:blur(5px);-webkit-filter:blur(5px)}
+.rfx-lock{position:absolute;inset:0;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:7px;text-align:center;
+background:linear-gradient(180deg,rgba(33,33,33,.18),rgba(33,33,33,.44))}
+.rfx-lock svg{width:21px;height:21px;display:block}
+.rfx-lock b{font-family:var(--rfx-display);font-weight:800;font-size:16px;
+letter-spacing:-.01em}
+.rfx-lock span{font-size:12.5px;color:var(--rfx-panel-mute);max-width:32ch;line-height:1.45}
 .rfx-fix{font-size:14px;color:var(--rfx-ink-2);margin:-6px 0 14px}
 .rfx-fix-btn{font:inherit;font-weight:700;color:var(--rfx-selected);background:none;
 border:0;padding:0;text-decoration:underline;cursor:pointer}
@@ -1810,13 +1832,62 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       { k: "phone",    label: "Phone",     type: "tel" }
     ];
 
+    /* A blurred look at the real figure, sitting above the form. The price is
+       already worked out by this point, so this is showing something that
+       exists rather than promising one. Returns "" when there is no price to
+       preview, which is the "we will price this by hand" path. */
+    function teaser() {
+      const r = S.price(state.answers);
+      if (!r || !isFinite(r.low) || !isFinite(r.high)) return "";
+      const plus = r.plus ? "+" : "";
+      const payLow = monthlyPayment(r.low, serviceId);
+      const payHigh = monthlyPayment(r.high, serviceId);
+      const showPay = !!(payLow && payHigh);
+      const thumb = state.place.lat
+        ? '<img class="rfx-panel-thumb" alt="" src="' +
+          (S.view === "street" ? streetViewUrl(state.place.lat, state.place.lng)
+                               : satelliteUrl(state.place.lat, state.place.lng)) + '">'
+        : "";
+      // aria-hidden so a screen reader does not simply read out what the blur
+      // is hiding. The heading and the button carry the meaning instead.
+      return '<div class="rfx-teaser" aria-hidden="true">' +
+        (state.place.address
+          ? '<div class="rfx-panel-head">' + thumb +
+            '<div style="min-width:0"><div class="rfx-panel-for">Your estimate for</div>' +
+            '<div class="rfx-panel-addr">' + esc(state.place.address) + '</div></div></div>'
+          : "") +
+        '<div class="rfx-teaser-figs">' +
+          '<span class="rfx-fig">' +
+            '<span class="rfx-fig-total rfx-blur">' + money(r.low) + '</span>' +
+            (showPay ? '<span class="rfx-fig-mo rfx-teaser-mo"><span class="rfx-blur">' +
+              moneyExact(payLow) + '/mo</span></span>' : "") +
+          '</span>' +
+          '<span class="rfx-figs-to">to</span>' +
+          '<span class="rfx-fig rfx-fig-hi">' +
+            '<span class="rfx-fig-total rfx-blur">' + money(r.high) + plus + '</span>' +
+            (showPay ? '<span class="rfx-fig-mo rfx-teaser-mo"><span class="rfx-blur">' +
+              moneyExact(payHigh) + '/mo</span></span>' : "") +
+          '</span>' +
+        '</div>' +
+        '<div class="rfx-lock">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" stroke-linejoin="round">' +
+          '<rect x="4" y="10.5" width="16" height="10" rx="2"></rect>' +
+          '<path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>' +
+          '<b>Almost there</b>' +
+          '<span>Tell us who we are quoting and your price appears on the next screen.</span>' +
+        '</div>' +
+      '</div>';
+    }
+
     function renderContact() {
       nextBtn.textContent = "See my price";
+      const peek = teaser();
       stage.innerHTML =
         '<p class="rfx-kicker">' + iconMark() + esc(S.label) + '</p>' +
-        '<h2 class="rfx-h">Almost there</h2>' +
-        '<p class="rfx-sub">Your price is ready. Tell us who we\'re quoting and we\'ll ' +
-        'show it on the next screen.</p>' +
+        '<h2 class="rfx-h">Almost there</h2>' + peek +
+        (peek ? "" : '<p class="rfx-sub">Your price is ready. Tell us who we\'re quoting ' +
+         'and we\'ll show it on the next screen.</p>') +
         FIELDS.map((f) =>
           '<div class="rfx-field"><label class="rfx-field-label" for="rfx_' + serviceId + "_" + f.k +
           '">' + f.label + '</label><input class="rfx-input" id="rfx_' + serviceId + "_" + f.k +
