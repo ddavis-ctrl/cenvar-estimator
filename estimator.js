@@ -113,6 +113,10 @@ background:var(--rfx-card);border:1px solid var(--rfx-line-2);border-radius:var(
 .rfx-input:focus{outline:2px solid var(--rfx-ink);outline-offset:-1px;border-color:var(--rfx-ink)}
 .rfx-input.is-bad{border-color:var(--rfx-red)}
 .rfx-err{font-size:14px;color:var(--rfx-red);margin-top:5px}
+.rfx-fix{font-size:14px;color:var(--rfx-ink-2);margin:-6px 0 14px}
+.rfx-fix-btn{font:inherit;font-weight:700;color:var(--rfx-selected);background:none;
+border:0;padding:0;text-decoration:underline;cursor:pointer}
+.rfx-fix-btn:hover{color:var(--rfx-ink)}
 
 .rfx-ac gmp-place-autocomplete{width:100%;display:block}
 .rfx-linkish{font:inherit;font-size:14px;color:var(--rfx-mute);background:none;border:0;
@@ -472,6 +476,10 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       onCallRendered: null,
 
       // Shown under the price. This is the line that answers sticker shock.
+      // Any service can override it with its own `reassurance` and
+      // `priceCaveat` — solar does, because "satisfied" is a subjective
+      // standard the solar team deliberately avoids, and because solar is a
+      // site assessment rather than a measurement.
       reassurance: "$0 down until the job is done. You don't pay until you're 100% satisfied.",
       // Sits under the price. Frames the range as a starting point and points
       // at the call, rather than apologising for not being exact.
@@ -539,8 +547,51 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         // no fees financed into the loan, so the two are identical. It is the
         // STARTING rate, meaning the best tier rather than what every buyer
         // gets, which is why the disclosure qualifies it.
-        "4107": { label: "Plan #4107", rate: 9.99, apr: 9.99, months: 180,
+        "4107": { label: "Plan #4107", lender: "Service Finance Company, LLC",
+                  rate: 9.99, apr: 9.99, months: 180,
                   factor: 0.0107, min: 3000, max: 100000, rateIsStarting: true },
+
+        /* ----------------------------------------------------------------
+           SOLAR — Atmos, residential solar, Virginia.
+           Best FICO tier (801-850) on the longest term, which is the lowest
+           monthly payment: 20 years at 7.59%. That tier lends to $125,000.
+           Lower tiers pay more and borrow less, which is why the disclosure
+           says rates start here rather than presenting this as the rate.
+
+           factor 0.0081111 is the true amortising factor for 7.59% over 240
+           months, computed rather than taken off the sheet, since Atmos
+           publishes rates rather than factors.
+
+           OUTSTANDING — THE 3% FEE. The sheet is headed "3% Fee Amortizing
+           Loans". If Atmos takes that fee out of the dealer proceeds, which
+           is the usual structure, the customer's APR is 7.59% and the
+           disclosure below is correct, but Cenvar nets 97% of every financed
+           job. If instead the fee is financed into the customer's loan, their
+           APR is closer to 8.00% and `apr` must be set to that. Confirm with
+           Kyle before this goes live.
+           ---------------------------------------------------------------- */
+        /* Atmos adds its 3% fee ON TOP of the cash contract price to get the
+           loan principal. Two consequences, both handled here:
+
+           1. `feeFactor` grosses the quote up before the payment is worked
+              out. Quoting off the cash price alone understates every payment.
+
+           2. That fee is a finance charge the customer pays, so the APR is
+              NOT the note rate. 7.59% over 240 months is 7.98% APR; 6.58%
+              over 144 is 7.15%. The disclosure states `apr`, which is what
+              Regulation Z requires. Stating the note rate would be false.
+
+           `min` and `max` apply to the LOAN, so after the gross-up the usable
+           cash range is roughly $9,709 to $121,359. */
+        "atmos20": { label: "Atmos 20 year", lender: "Atmos Financial",
+                     rate: 7.59, apr: 7.98, months: 240,
+                     factor: 0.0081111, feeFactor: 1.03,
+                     min: 10000, max: 125000, rateIsStarting: true },
+
+        "atmos12": { label: "Atmos 12 year", lender: "Atmos Financial",
+                     rate: 6.58, apr: 7.15, months: 144,
+                     factor: 0.0100613, feeFactor: 1.03,
+                     min: 10000, max: 125000, rateIsStarting: true },
         "4132": { label: "Plan #4132", rate: 9.99, months: 120, factor: 0.0132,
                   min: 3000, max: 100000 },
         "4202": { label: "Plan #4202", rate: 7.99, months: 60,  factor: 0.0202,
@@ -562,7 +613,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
          switch one, the disclosure follows automatically. */
       byService: {
         roofing: "4107", windows: "4107", doors: "4107", siding: "4107",
-        solar:   null      // awaiting the solar rate sheet
+        solar:   "atmos20"   // different lender, different sheet
       },
 
       downPayment: 0,
@@ -590,8 +641,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         "creditworthiness, so your payment may be higher. Payment shown is an " +
         "estimate based on a preliminary price range, not a final quote or an offer " +
         "of credit. Actual rate, term, and payment depend on creditworthiness, final " +
-        "project cost, and lender approval. Financing provided by Service Finance " +
-        "Company, LLC. Subject to credit approval. Minimum amount financed {min}."
+        "project cost, and lender approval. The amount financed may include a " +
+        "lender fee added to the contract price. Financing provided by " +
+        "{lender}. Subject to credit approval. Minimum amount financed {min}."
     },
 
     bookingUrl: "",              // TODO: HubSpot meetings link
@@ -1013,7 +1065,18 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       label: "Solar", hubNote: "Roof and ground mounted systems",
       intro: "Get your solar price in about a minute",
       view: "satellite",
-      image: "", hubImage: "", imageAlt: "A Cenvar solar installation",
+      // Inlined as a CSS mask, so the icon takes the colour of the text
+      // beside it rather than being locked to white.
+      icon: "data:image/png;base64,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",
+      image: "https://cdn.prod.website-files.com/64244447fb8d73d5af3e8ce8/6ab29ceffa74ab79fe9f411b_solar-banner.jpg", hubImage: "https://cdn.prod.website-files.com/64244447fb8d73d5af3e8ce8/6ab29cefc4cdf77f66d3a337_solar-tile.jpg", imageAlt: "A Cenvar solar installation",
+
+      // Payment is tied to milestones rather than to satisfaction. Nothing is
+      // due until the panels are physically up, and the invoice follows the
+      // jurisdictional inspections rather than a judgement call.
+      reassurance: "$0 down. Nothing is due until your panels are installed. Invoice " +
+        "due upon the passed inspection.",
+      priceCaveat: "This is what systems like yours typically cost. A free site " +
+        "assessment gives you the exact number, with no pressure to book.",
 
       questionsFor(a) {
         const q = [{
@@ -1192,10 +1255,117 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     const F = SETTINGS.financing;
     const p = planFor(serviceId);
     if (!p) return null;
-    const principal = amount * (F.priceFactor || 1) - (F.downPayment || 0);
+    // The lender's own fee comes first: it sets the loan principal, and the
+    // limits below apply to that principal, not to the cash quote.
+    const gross = amount * (p.feeFactor || F.priceFactor || 1);
+    const principal = gross - (F.downPayment || 0);
     if (principal < p.min || principal > p.max) return null;
     return principal * p.factor;
   }
+
+  /* =========================================================================
+     CONTACT VALIDATION
+     -------------------------------------------------------------------------
+     Three leads were lost in one week to three characters: gmail.con,
+     aol.comj, aol.col. HubSpot keys contacts on email, so a bad address meant
+     no contact, which meant the call-centre workflow never enrolled and
+     nobody rang them. One was an $18k-$36k window job.
+
+     Two layers, both free and both client side:
+
+       1. a typo table for the domains people actually mistype
+       2. an MX lookup over DNS-over-HTTPS, which catches every dead domain
+          including ones nobody thought to list
+
+     Design rules, in order of importance:
+       - FAIL OPEN. If DNS is slow, blocked or down, the lead goes through.
+         A validation outage must never cost a submission.
+       - PROMPT, DO NOT BLOCK, on anything uncertain. A real domain that looks
+         like a typo warns once, then submits if they insist.
+       - Only hard-block a domain with no mail server at all, because HubSpot
+         would drop that contact anyway and the lead is lost either way.
+     ========================================================================= */
+  const EMAIL_FIXES = {
+    "gmail.con": "gmail.com", "gmail.co": "gmail.com", "gmail.cm": "gmail.com",
+    "gmial.com": "gmail.com", "gmai.com": "gmail.com", "gamil.com": "gmail.com",
+    "gmail.comm": "gmail.com", "gnail.com": "gmail.com",
+    "aol.con": "aol.com", "aol.col": "aol.com", "aol.comj": "aol.com",
+    "aol.co": "aol.com", "aol.cm": "aol.com",
+    "yahoo.con": "yahoo.com", "yahoo.co": "yahoo.com", "yaho.com": "yahoo.com",
+    "yahoo.comm": "yahoo.com", "ymail.con": "ymail.com",
+    "hotmail.con": "hotmail.com", "hotmail.co": "hotmail.com", "hotmial.com": "hotmail.com",
+    "outlook.con": "outlook.com", "outlook.co": "outlook.com", "outlok.com": "outlook.com",
+    "comcast.net.": "comcast.net", "comcast.con": "comcast.net",
+    "verizon.con": "verizon.net", "icloud.con": "icloud.com", "me.con": "me.com"
+  };
+  // A trailing string that cannot be a real TLD. ".com" mistyped nearly always
+  // lands in here.
+  const BAD_TLD = /\.(con|col|cmo|comj|comm|vom|xom|co m|om|c0m|net\.|ne|nt)$/;
+
+  const mxCache = {};
+  function domainHasMail(domain) {
+    if (mxCache[domain] !== undefined) return Promise.resolve(mxCache[domain]);
+    const done = (v) => { mxCache[domain] = v; return v; };
+    try {
+      const ctl = typeof AbortController === "function" ? new AbortController() : null;
+      const timer = setTimeout(() => { if (ctl) ctl.abort(); }, 2500);
+      return fetch("https://cloudflare-dns.com/dns-query?name=" +
+          encodeURIComponent(domain) + "&type=MX",
+          { headers: { accept: "application/dns-json" }, signal: ctl ? ctl.signal : undefined })
+        .then((r) => r.json())
+        .then((d) => {
+          clearTimeout(timer);
+          // Status 3 is NXDOMAIN: the domain does not exist at all.
+          if (d.Status === 3) return done(false);
+          if (d.Status !== 0) return done(true);          // unsure, let it through
+          return done(Array.isArray(d.Answer) && d.Answer.length > 0);
+        })
+        .catch(() => { clearTimeout(timer); return true; });   // fail open
+    } catch (e) { return Promise.resolve(true); }
+  }
+
+  // Returns {ok} | {ok:false, suggest} | {ok:false, hard:true, suggest}
+  function checkEmail(raw) {
+    const e = String(raw || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e)) return Promise.resolve({ ok: false });
+    const domain = e.split("@")[1];
+    if (EMAIL_FIXES[domain]) {
+      return Promise.resolve({ ok: false, suggest: e.replace(domain, EMAIL_FIXES[domain]) });
+    }
+    if (BAD_TLD.test(domain)) {
+      return Promise.resolve({ ok: false, suggest: e.replace(/\.[a-z0-9 .]+$/, ".com") });
+    }
+    return domainHasMail(domain).then((live) => live
+      ? { ok: true }
+      : { ok: false, hard: true, suggest: e.replace(/\.[a-z]+$/, ".com") });
+  }
+
+  /* Phone. The North American plan says an area code and an exchange both
+     start 2-9, and 555-01xx is reserved for fiction. Everything below is a
+     number that cannot ring, so blocking it costs nothing. A transposed digit
+     in a real number is not catchable here; the price screen shows the number
+     back to them instead. */
+  function checkPhone(raw) {
+    let d = String(raw || "").replace(/\D/g, "");
+    if (d.length === 11 && d[0] === "1") d = d.slice(1);
+    if (d.length !== 10) return { ok: false, msg: "Enter a 10 digit phone number." };
+    if (!/^[2-9]/.test(d)) return { ok: false, msg: "Area codes do not start with 0 or 1." };
+    if (!/^[2-9]/.test(d[3])) return { ok: false, msg: "Check the number after the area code." };
+    if (/^555(01\d\d|0100)$/.test(d.slice(3))) return { ok: false, msg: "That is not a working number." };
+    if (/^(\d)\1{9}$/.test(d)) return { ok: false, msg: "Check the phone number." };
+    if (d === "1234567890" || d === "0123456789") return { ok: false, msg: "Check the phone number." };
+    return { ok: true, digits: d };
+  }
+
+  const prettyPhone = (raw) => {
+    let d = String(raw || "").replace(/\D/g, "");
+    if (d.length === 11 && d[0] === "1") d = d.slice(1);
+    d = d.slice(0, 10);
+    if (d.length > 6) return "(" + d.slice(0,3) + ") " + d.slice(3,6) + "-" + d.slice(6);
+    if (d.length > 3) return "(" + d.slice(0,3) + ") " + d.slice(3);
+    if (d.length > 0) return "(" + d;
+    return "";
+  };
 
   function track(name, params) {
     try {
@@ -1653,13 +1823,70 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           '" type="' + f.type + '" value="' + esc(state.contact[f.k] || "") + '"' +
           (f.k === "phone" ? ' inputmode="tel"' : "") + '>' +
           '<p class="rfx-err" id="rfxErr_' + serviceId + "_" + f.k + '" hidden></p></div>').join("") +
+        '<p class="rfx-fix" id="rfxFix_' + serviceId + '" hidden></p>' +
         '<p class="rfx-fine rfx-form-err" hidden style="color:var(--rfx-red)"></p>';
 
       FIELDS.forEach((f) => {
-        q("#rfx_" + serviceId + "_" + f.k)
-          .addEventListener("input", (e) => { state.contact[f.k] = e.target.value; });
+        const el = q("#rfx_" + serviceId + "_" + f.k);
+        el.addEventListener("input", (e) => {
+          if (f.k === "phone") {
+            // Format as they type so a wrong digit count is visible rather
+            // than something they only discover at submit.
+            const pos = e.target.selectionStart, before = e.target.value.length;
+            e.target.value = prettyPhone(e.target.value);
+            const after = e.target.value.length;
+            if (pos !== null) {
+              try { e.target.setSelectionRange(pos + (after - before), pos + (after - before)); }
+              catch (x) {}
+            }
+          }
+          state.contact[f.k] = e.target.value;
+          const err = q("#rfxErr_" + serviceId + "_" + f.k);
+          err.hidden = true; el.classList.remove("is-bad");
+          const s = q("#rfxFix_" + serviceId);
+          if (f.k === "email" && s) s.hidden = true;
+        });
+        // Check the address the moment they leave the field, not at submit,
+        // so the fix is offered while they are still looking at it.
+        if (f.k === "email") el.addEventListener("blur", () => emailGate(false));
       });
+      state.emailWarned = false;
       nextBtn.disabled = false;
+    }
+
+    /* Runs on blur and again before submit. `blocking` is true only on
+       submit, where a dead domain stops the send. On blur it never blocks,
+       it just offers the correction. */
+    function emailGate(blocking) {
+      const el = q("#rfx_" + serviceId + "_email");
+      const err = q("#rfxErr_" + serviceId + "_email");
+      const fix = q("#rfxFix_" + serviceId);
+      const v = (state.contact.email || "").trim();
+      if (!el || !v) return Promise.resolve(true);
+
+      return checkEmail(v).then((r) => {
+        if (r.ok) { fix.hidden = true; return true; }
+        if (!r.suggest) {
+          if (blocking) { err.hidden = false; err.textContent = "Check the email address.";
+                          el.classList.add("is-bad"); }
+          return !blocking;
+        }
+        fix.hidden = false;
+        fix.innerHTML = 'Did you mean <button type="button" class="rfx-fix-btn">' +
+          esc(r.suggest) + '</button>?';
+        fix.querySelector(".rfx-fix-btn").addEventListener("click", () => {
+          state.contact.email = r.suggest;
+          el.value = r.suggest;
+          fix.hidden = true; err.hidden = true; el.classList.remove("is-bad");
+          state.emailWarned = false;
+        });
+        if (!blocking) return true;
+        // A domain with no mail server is a dead end, so hold them there.
+        if (r.hard) { el.classList.add("is-bad"); return false; }
+        // A live domain that merely looks wrong: warn once, then respect it.
+        if (!state.emailWarned) { state.emailWarned = true; el.classList.add("is-bad"); return false; }
+        return true;
+      }).catch(() => true);
     }
 
     function validate() {
@@ -1670,7 +1897,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         let msg = "";
         if (!v) msg = f.label + " is required.";
         else if (f.k === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) msg = "Check the email address.";
-        else if (f.k === "phone" && v.replace(/\D/g, "").length < 10) msg = "Enter a 10 digit phone number.";
+        else if (f.k === "phone") { const p = checkPhone(v); if (!p.ok) msg = p.msg; }
         else if (f.k === "fullName" && v.split(/\s+/).length < 2) msg = "First and last name, please.";
         err.hidden = !msg; err.textContent = msg;
         el.classList.toggle("is-bad", !!msg);
@@ -1724,7 +1951,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
       const pairs = [
         [P.firstName, parts[0]], [P.lastName, parts.slice(1).join(" ")],
-        [P.email, c.email], [P.phone, c.phone],
+        [P.email, c.email], [P.phone, c.phoneDigits || c.phone],
         [P.address, state.place.address], [P.zip, state.place.zip],
         [P.service, S.label],
         [P.estimateLow, r ? String(round(r.low)) : ""],
@@ -1800,8 +2027,6 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       return '<a class="rfx-btn rfx-btn-primary rfx-call" style="width:100%" href="' +
         C.phoneHref + '">Call ' + esc(C.phone) + ' to schedule</a>' +
         (C.hours ? '<p class="rfx-fine rfx-center">' + esc(C.hours) + '</p>' : "") +
-        '<p class="rfx-fine rfx-center">Rather we reach out? Someone will call you ' +
-        'within one business day.</p>' +
         (SETTINGS.bookingUrl
           ? '<p class="rfx-center" style="margin-top:12px"><a class="rfx-linkish" href="' +
             SETTINGS.bookingUrl + '">Or pick a time online</a></p>' : "");
@@ -1875,7 +2100,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       const text = F.disclosure
         .replace(/\{months\}/g, p ? p.months : "")
         .replace(/\{rate\}/g, p ? (p.apr != null ? p.apr : p.rate) : "")
-        .replace(/\{min\}/g, p ? "$" + p.min.toLocaleString("en-US") : "");
+        .replace(/\{min\}/g, p ? "$" + p.min.toLocaleString("en-US") : "")
+        .replace(/\{lender\}/g, p ? (p.lender || "our lending partner") : "");
       return '<p class="rfx-disclosure">' + esc(text) + '</p>';
     }
 
@@ -1962,8 +2188,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         (breakdown ? '<div class="rfx-range">' + breakdown + '</div>' : "") +
         (showPay ? disclosureBlock() : "") +
         (r.note ? '<div class="rfx-note">' + esc(r.note) + '</div>' : "") + recap +
-        '<div class="rfx-note"><strong>' + esc(C.reassurance) + '</strong> ' +
-        esc(C.priceCaveat) + '</div>' + cta + statRow +
+        '<div class="rfx-note"><strong>' + esc(S.reassurance || C.reassurance) + '</strong> ' +
+        esc(S.priceCaveat || C.priceCaveat) + '</div>' + cta + statRow +
         (function () {
           const line = S.trustLine || C.trustLine;
           return line ? '<p class="rfx-fine rfx-center">' + esc(line) + '</p>' : "";
@@ -1976,9 +2202,31 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     function goNext() {
       if (kind() === "contact") {
         if (!validate() || state.sent) return;
+        nextBtn.disabled = true; nextBtn.textContent = "Checking…";
+        emailGate(true).then((ok) => {
+          if (!ok) {
+            nextBtn.disabled = false; nextBtn.textContent = "See my price";
+            return;
+          }
+          sendIt();
+        });
+        return;
+      }
+      if (state.index < totalSteps() - 1) {
+        state.index++; render();
+        window.scrollTo({ top: root.offsetTop - 20, behavior: "smooth" });
+      }
+    }
+
+    function sendIt() {
+      {
         state.result = S.price(state.answers);
         nextBtn.disabled = true; nextBtn.textContent = "Sending…";
         q(".rfx-form-err").hidden = true;
+        // Send digits only. HubSpot keys on email, but the call centre dials
+        // the phone, so it should arrive clean rather than as typed.
+        const pc = checkPhone(state.contact.phone);
+        if (pc.ok) state.contact.phoneDigits = pc.digits;
         submitLead().then(() => {
           state.sent = true;
           const mid = state.result ? Math.round((state.result.low + state.result.high) / 2) : 0;
@@ -1996,11 +2244,6 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           e.textContent = "That did not go through. Check your connection and try again, " +
             "or call us at " + C.phone + " and we will take it down over the phone.";
         });
-        return;
-      }
-      if (state.index < totalSteps() - 1) {
-        state.index++; render();
-        window.scrollTo({ top: root.offsetTop - 20, behavior: "smooth" });
       }
     }
 
