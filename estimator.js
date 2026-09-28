@@ -135,6 +135,13 @@ background:linear-gradient(180deg,rgba(33,33,33,.18),rgba(33,33,33,.44))}
 .rfx-lock b{font-family:var(--rfx-display);font-weight:800;font-size:16px;
 letter-spacing:-.01em}
 .rfx-lock span{font-size:12.5px;color:var(--rfx-panel-mute);max-width:32ch;line-height:1.45}
+.rfx-prior{border:1px solid var(--rfx-line);border-radius:var(--rfx-radius-card);
+padding:14px 16px;margin:18px 0 0;background:var(--rfx-card)}
+.rfx-prior-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+color:var(--rfx-mute);margin-bottom:8px}
+.rfx-prior-row{display:flex;justify-content:space-between;gap:14px;padding:6px 0;font-size:14px}
+.rfx-prior-k{color:var(--rfx-ink-2);min-width:0}
+.rfx-prior-v{font-family:var(--rfx-display);font-weight:600;white-space:nowrap}
 .rfx-fix{font-size:14px;color:var(--rfx-ink-2);margin:-6px 0 14px}
 .rfx-fix-btn{font:inherit;font-weight:700;color:var(--rfx-selected);background:none;
 border:0;padding:0;text-decoration:underline;cursor:pointer}
@@ -1455,11 +1462,15 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
     const state = {
       answers: {}, place: { address: "", zip: "", lat: null, lng: null },
-      contact: {}, index: 0, result: null, sent: false
+      contact: {}, index: 0, result: null, sent: false,
+      // Every option they price, in order. Kept so the rep sees all of them
+      // rather than only the last, and so the customer can compare without
+      // starting the form again.
+      quotes: [], lastSentKey: ""
     };
 
     const questions = () => S.questionsFor ? S.questionsFor(state.answers) : S.questions;
-    const totalSteps = () => 1 + questions().length + (PREVIEW ? 1 : 2);
+    const totalSteps = () => 1 + questions().length + ((PREVIEW || state.sent) ? 1 : 2);
 
     root.classList.add("rfx");
     applyBrand(root);
@@ -1493,7 +1504,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       const qs = questions();
       if (state.index === 0) return "address";
       if (state.index <= qs.length) return "question";
-      if (!PREVIEW && state.index === qs.length + 1) return "contact";
+      // Once we have their details the gate is gone. Re-pricing must never ask
+      // for a name and email again, and must never look like a second enquiry.
+      if (!PREVIEW && !state.sent && state.index === qs.length + 1) return "contact";
       return "price";
     }
 
@@ -1999,8 +2012,14 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         // individual door prices. Never shown to the customer.
         (doorCount > 1 ? "\nPriced as a " + doorCount + " door job" : "") +
         (state.place.address ? "\nAddress: " + state.place.address : "") +
-        (r ? "\nEstimate: " + money(r.low) + " to " + money(r.high) + (r.plus ? "+" : "")
-           : "\nEstimate: not priced online, needs a call");
+        // Every option they looked at, not just the last. Without this a second
+        // look overwrites the first and the rep never learns it happened.
+        (state.quotes.length > 1
+          ? "\nPriced " + state.quotes.length + " options:" +
+            state.quotes.map((q2, i) => "\n  " + (i + 1) + ". " + q2.label + " — " +
+              money(q2.low) + " to " + money(q2.high) + (q2.plus ? "+" : "")).join("")
+          : (r ? "\nEstimate: " + money(r.low) + " to " + money(r.high) + (r.plus ? "+" : "")
+               : "\nEstimate: not priced online, needs a call"));
 
       const attrSrc = (function () {
         const svc = S.label || "Estimator";
@@ -2025,8 +2044,14 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         [P.email, c.email], [P.phone, c.phoneDigits || c.phone],
         [P.address, state.place.address], [P.zip, state.place.zip],
         [P.service, S.label],
-        [P.estimateLow, r ? String(round(r.low)) : ""],
-        [P.estimateHigh, r ? String(round(r.high)) : ""],
+        // Span every option, so filtering on job size catches the largest thing
+        // they considered rather than whichever they happened to view last.
+        [P.estimateLow, state.quotes.length
+          ? String(round(Math.min.apply(null, state.quotes.map((q2) => q2.low))))
+          : (r ? String(round(r.low)) : "")],
+        [P.estimateHigh, state.quotes.length
+          ? String(round(Math.max.apply(null, state.quotes.map((q2) => q2.high))))
+          : (r ? String(round(r.high)) : "")],
         [P.details, details],
         [P.attributionSource, attrSrc]
       ].filter((p) => p[0] && p[1]);
@@ -2138,6 +2163,20 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       requestAnimationFrame(frame);
     }
 
+    /* Straight back to the first question, keeping the address and their
+       details. No form, no second lead, no re-enrolment in the call-centre
+       workflow. */
+    function wireAgain() {
+      const b = q(".rfx-again");
+      if (!b) return;
+      b.addEventListener("click", () => {
+        track("estimator_reprice_click", { service: serviceId });
+        state.index = 1;
+        render();
+        window.scrollTo({ top: root.offsetTop - 20, behavior: "smooth" });
+      });
+    }
+
     function wireCall() {
       const b = q(".rfx-call");
       if (!b) return;
@@ -2176,9 +2215,43 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       return '<p class="rfx-disclosure">' + esc(text) + '</p>';
     }
 
+    // A stable fingerprint of the current answers, so a genuinely new option
+    // can be told apart from a re-render of the same one.
+    function answersKey() {
+      const a = state.answers;
+      return Object.keys(a).sort().map((k) => k + "=" + a[k]).join("|");
+    }
+
+    function describeAnswers() {
+      return questions().filter((qq) => !qq.nav).map((qq) => answerText(qq)).join(", ");
+    }
+
+    /* Record the option on screen, then push the whole set back to HubSpot.
+       This UPDATES the same contact rather than creating a second one, and
+       deliberately does NOT fire generate_lead again: one person, one
+       enquiry. Counting it twice would flatter the cost per lead and teach
+       Meta to find people who submit repeatedly. */
+    function recordQuote(r) {
+      if (!r) return;
+      const key = answersKey();
+      if (key === state.lastSentKey) return;
+      state.lastSentKey = key;
+      state.quotes.push({ label: describeAnswers(), low: r.low, high: r.high, plus: !!r.plus });
+      // The first option is already on its way as part of the lead itself.
+      // Only a genuine second look needs an update.
+      if (state.quotes.length < 2 || !state.sent) return;
+      submitLead().catch(() => {});       // silent: they already have their price
+      track("estimator_reprice", {
+        service: serviceId, option_number: state.quotes.length,
+        value: Math.round((r.low + r.high) / 2), currency: "USD"
+      });
+    }
+
     function renderPrice() {
       // In preview there is no contact step, so the price is worked out here.
-      if (PREVIEW) state.result = S.price(state.answers);
+      // After a re-price there is no contact step either, and the answers have
+      // changed, so it has to be worked out again or they see the old number.
+      if (PREVIEW || state.sent) state.result = S.price(state.answers);
       const r = state.result;
       const recap = '<div class="rfx-recap">' +
         (state.place.address ? '<div class="rfx-recap-row"><span class="rfx-recap-k">Home</span>' +
@@ -2188,6 +2261,24 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           esc(questionLabel(qq)) + '</span><span class="rfx-recap-v">' + esc(answerText(qq)) +
           '</span></div>').join("") + '</div>';
 
+      recordQuote(r);
+
+      // Anything they priced before this one, so comparing does not need a
+      // second trip through the funnel.
+      const others = state.quotes.slice(0, -1);
+      const priorBlock = others.length
+        ? '<div class="rfx-prior"><p class="rfx-prior-h">You also priced</p>' +
+          others.map((q2) =>
+            '<div class="rfx-prior-row"><span class="rfx-prior-k">' + esc(q2.label) + '</span>' +
+            '<span class="rfx-prior-v">' + money(q2.low) + ' – ' + money(q2.high) +
+            (q2.plus ? "+" : "") + '</span></div>').join("") + '</div>'
+        : "";
+
+      const againBtn = '<button type="button" class="rfx-btn rfx-btn-ghost rfx-again" ' +
+        'style="width:100%;margin-top:10px">Price a different option</button>' +
+        '<p class="rfx-fine rfx-center">Your details are saved, so this will not ' +
+        'start a new request.</p>';
+
       const cta = ctaBlock();
 
       if (!r) {
@@ -2196,7 +2287,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           '<p class="rfx-sub">What you described does not fit a standard price, which usually ' +
           'means there is a better option than the catalog answer. Someone will call within ' +
           'one business day.</p>' + recap + cta;
-        wireCall();
+        wireCall(); wireAgain();
         return;
       }
 
@@ -2260,13 +2351,14 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
         (showPay ? disclosureBlock() : "") +
         (r.note ? '<div class="rfx-note">' + esc(r.note) + '</div>' : "") + recap +
         '<div class="rfx-note"><strong>' + esc(S.reassurance || C.reassurance) + '</strong> ' +
-        esc(S.priceCaveat || C.priceCaveat) + '</div>' + cta + statRow +
+        esc(S.priceCaveat || C.priceCaveat) + '</div>' + cta + againBtn + priorBlock + statRow +
         (function () {
           const line = S.trustLine || C.trustLine;
           return line ? '<p class="rfx-fine rfx-center">' + esc(line) + '</p>' : "";
         })();
       revealPrice();
       wireCall();
+      wireAgain();
     }
 
     /* --- Nav --- */
