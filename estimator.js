@@ -484,7 +484,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       windows: "/lander-windows-estimate",
       doors:   "/lander-doors-estimate",
       siding:  "/lander-siding-estimate",
-      solar:   "/lander-solar-estimate"   // TODO: create this page
+      solar:   "https://www.cenvarsolar.com/solar-estimator"   // separate site
     },
     // Pulled from cenvarroofing.com. Edit if any of it is stale.
     company: {
@@ -492,6 +492,9 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       // CallTrackingMetrics number. Used for every call link in the funnel so
       // estimator calls are attributable. Changing it here changes it
       // everywhere: the price-screen button and the submission-error message.
+      // Default for roofing, windows, doors and siding. A service can carry
+      // its own number with `phone` and `phoneHref`, which solar does since
+      // it runs on a separate site and a separate ad account.
       phone:     "(888) 902-3501",
       phoneHref: "tel:8889023501",
       hours:     "",   // optional, e.g. "Mon to Fri, 8am to 5pm"
@@ -1102,6 +1105,11 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       // Payment is tied to milestones rather than to satisfaction. Nothing is
       // due until the panels are physically up, and the invoice follows the
       // jurisdictional inspections rather than a judgement call.
+      // Solar has its own tracking number: the lander lives on cenvarsolar.com
+      // and the spend comes from a different ad account.
+      phone:     "(434) 204-9741",
+      phoneHref: "tel:4342049741",
+
       reassurance: "$0 down. Nothing is due until your panels are installed. Invoice " +
         "due upon the passed inspection.",
       priceCaveat: "This is what systems like yours typically cost. A free site " +
@@ -2119,9 +2127,14 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     // The call button is the conversion. A booking widget adds a step; picking
     // up the phone is the step. The number is in the label so it still works on
     // desktop, where a tel: link often does nothing.
+    // One place decides which number this funnel shows, so the button and the
+    // submission-error message can never disagree.
+    const PHONE = S.phone || C.phone;
+    const PHONE_HREF = S.phoneHref || C.phoneHref;
+
     function ctaBlock() {
       return '<a class="rfx-btn rfx-btn-primary rfx-call" style="width:100%" href="' +
-        C.phoneHref + '">Call ' + esc(C.phone) + ' to schedule</a>' +
+        PHONE_HREF + '">Call ' + esc(PHONE) + ' to schedule</a>' +
         (C.hours ? '<p class="rfx-fine rfx-center">' + esc(C.hours) + '</p>' : "") +
         (SETTINGS.bookingUrl
           ? '<p class="rfx-center" style="margin-top:12px"><a class="rfx-linkish" href="' +
@@ -2405,7 +2418,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           const e = q(".rfx-form-err");
           e.hidden = false;
           e.textContent = "That did not go through. Check your connection and try again, " +
-            "or call us at " + C.phone + " and we will take it down over the phone.";
+            "or call us at " + PHONE + " and we will take it down over the phone.";
         });
       }
     }
