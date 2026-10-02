@@ -484,7 +484,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       windows: "/lander-windows-estimate",
       doors:   "/lander-doors-estimate",
       siding:  "/lander-siding-estimate",
-      solar:   "https://www.cenvarsolar.com/solar-estimator"   // separate site
+      solar:   "/lander-solar-estimate"
     },
     // Pulled from cenvarroofing.com. Edit if any of it is stale.
     company: {
