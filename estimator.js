@@ -258,6 +258,81 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 @media(prefers-reduced-motion:reduce){
   .rfx *,.rfx *::after{transition:none!important;animation:none!important}
 }
+
+/* --- dimension -----------------------------------------------------------
+   The funnel is a tool embedded on the site rather than another page of it,
+   so it carries depth the flat site does not.
+
+   Only the GRADIENT sits behind text; highlight, rim and shadow live at the
+   edges. So the gradient holds light through the text and dives only in the
+   last 28% where the rim is, and its bottom stop is fed to the contrast
+   solver in brandVars(). Spending the depth budget on the edges instead of
+   the fill is what keeps small text legible.
+
+   Tuned values: gradient 22, highlight 1.00, rim 0.14, shadow 1.25, radius
+   20px. Change --d-sh to scale every shadow layer and the hover lift at once.
+-------------------------------------------------------------------------- */
+.rfx{--d-hi:1;--d-rim:.14;--d-sh:1.25}
+.rfx-opt,.rfx-range,.rfx-note,.rfx-prior,.rfx-stepper,.rfx-hub-card,.rfx-stat{
+background-image:linear-gradient(180deg,var(--rfx-card) 0%,
+  color-mix(in srgb,var(--rfx-card) 55%,var(--rfx-card-grad-end)) 72%,
+  var(--rfx-card-grad-end) 100%);
+box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
+           inset 0 -2px 0 rgba(27,42,51,var(--d-rim)),
+           0 calc(2px*var(--d-sh)) calc(3px*var(--d-sh)) rgba(27,42,51,calc(.06*var(--d-sh))),
+           0 calc(8px*var(--d-sh)) calc(18px*var(--d-sh)) rgba(27,42,51,calc(.10*var(--d-sh))),
+           0 calc(20px*var(--d-sh)) calc(44px*var(--d-sh)) rgba(27,42,51,calc(.11*var(--d-sh)))}
+.rfx-opt,.rfx-btn,.rfx-hub-card{transition:transform .14s cubic-bezier(.2,.7,.3,1),
+  box-shadow .14s ease,border-color .14s ease}
+.rfx-opt:hover,.rfx-hub-card:hover{transform:translateY(-3px)}
+.rfx-opt:active{transform:translateY(2px);
+  box-shadow:inset 0 2px 5px rgba(27,42,51,.16),0 1px 2px rgba(27,42,51,.10)}
+.rfx-btn-primary{background-image:linear-gradient(180deg,
+  color-mix(in srgb,var(--rfx-action) 86%,#FFF) 0%,var(--rfx-action) 100%);
+box-shadow:inset 0 2px 0 rgba(255,255,255,.30),inset 0 -2px 0 rgba(0,0,0,.26),
+           0 calc(3px*var(--d-sh)) calc(5px*var(--d-sh)) rgba(27,42,51,.17),
+           0 calc(10px*var(--d-sh)) calc(22px*var(--d-sh)) rgba(27,42,51,.22)}
+.rfx-btn-primary:hover{transform:translateY(-3px)}
+.rfx-btn-primary:active{transform:translateY(2px);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.34),0 1px 2px rgba(27,42,51,.14)}
+/* MUST carry both classes and sit after .rfx-btn-primary. At equal specificity
+   the later rule wins, and a bare .rfx-btn-ghost here renders dark ink on the
+   dark primary gradient. */
+.rfx-btn.rfx-btn-ghost{color:var(--rfx-ink);font-weight:600;
+background-image:linear-gradient(180deg,var(--rfx-card) 0%,
+  color-mix(in srgb,var(--rfx-card) 55%,var(--rfx-card-grad-end)) 72%,
+  var(--rfx-card-grad-end) 100%);
+border:1px solid var(--rfx-line-2);
+box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
+           inset 0 -2px 0 rgba(27,42,51,var(--d-rim)),
+           0 calc(2px*var(--d-sh)) calc(3px*var(--d-sh)) rgba(27,42,51,.06),
+           0 calc(8px*var(--d-sh)) calc(18px*var(--d-sh)) rgba(27,42,51,.09)}
+.rfx-btn.rfx-btn-ghost:hover{transform:translateY(-3px);border-color:var(--rfx-ink)}
+.rfx-btn.rfx-btn-ghost:active{transform:translateY(2px);
+  box-shadow:inset 0 2px 5px rgba(27,42,51,.16)}
+.rfx-range-bar{border-radius:99px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.12)}
+/* Browsers without color-mix get a flat card rather than a broken gradient. */
+@supports not (background:color-mix(in srgb,#000 50%,#FFF)){
+  .rfx-opt,.rfx-range,.rfx-note,.rfx-prior,.rfx-stepper,.rfx-hub-card,.rfx-stat,
+  .rfx-btn.rfx-btn-ghost{background-image:none}
+}
+
+/* --- price sizing --------------------------------------------------------
+   These keyed off vw, i.e. the viewport, while the shell is capped at 640px.
+   On a wide screen that resolves to the maximum regardless of how narrow the
+   card actually is, and Outfit is wider than the old fallback, so the two
+   figures overran. Container units tie the size to the card. The vw clamp
+   stays as the fallback. */
+.rfx-range,.rfx-panel{container-type:inline-size}
+@supports (font-size:1cqi){
+  .rfx-range-nums{font-size:clamp(23px,6.4cqi,34px)}
+  .rfx-fig-total{font-size:clamp(22px,6.1cqi,32px)}
+}
+.rfx-range-nums{min-width:0}
+.rfx-range-nums span,.rfx-fig-total{white-space:nowrap}
+/* Outfit sets a touch wide at display sizes. */
+.rfx-range-nums,.rfx-h,.rfx-fig-total,.rfx-step-val{letter-spacing:-.022em}
 `;
     document.head.appendChild(st);
   }
@@ -333,8 +408,13 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     // Corner rounding. `radius` covers buttons and form fields.
     // `radiusCard` covers option cards and panels; raise it to match if you
     // want everything on the same curve.
-    radius:     "10px",
-    radiusCard: "10px",   // answer cards, panels, satellite frame, hub tiles
+    radius:     "20px",
+    radiusCard: "20px",   // answer cards, panels, satellite frame, hub tiles
+
+    /* Bottom stop of the card gradient. It is a real background that text sits
+       on, so it is fed into the contrast solver below alongside card and
+       surface. Darken it and `mute` lightens less, automatically. */
+    cardGradEnd: "#DCE3E6",
 
     // false keeps the funnel flat, matching cenvarroofing.com, which has no
     // shadows anywhere. true lifts the cards off the page. The shadow colour
@@ -347,9 +427,14 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
     // "inherit" makes the funnel pick up whatever font the Webflow page already
     // loads, so it matches your site without naming a family. To force one
     // instead, set fontUrl to a Google Fonts URL and name the families here.
-    fontUrl:     "",
-    displayFont: "inherit",
-    bodyFont:    "inherit"
+    /* The funnel used to inherit the Webflow page font. It is now its own
+       thing: a tool embedded on the site rather than another page of it.
+       loadBrandFont() injects this link with preconnects, so there is nothing
+       to add on the Webflow side. */
+    fontUrl:     "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800" +
+                 "&family=Figtree:wght@400;500;600;700&display=swap",
+    displayFont: "'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif",
+    bodyFont:    "'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif"
   };
 
   /* --- Brand plumbing. You should not need to touch anything below here. --- */
@@ -389,7 +474,10 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
   function brandVars() {
     const B = BRAND, W = "#FFFFFF", K = "#000000";
     const card = B.card || W;
-    const bgs = [card, B.surface];
+    /* The card gradient's bottom stop is darker than the card, and small text
+       sits on it, so it belongs in the set the contrast solver works against.
+       Without it `mute` clears 4.5:1 on white and fails on the gradient. */
+    const bgs = [card, B.surface, B.cardGradEnd || card];
     const action = B.action || B.ink;
     return {
       "--rfx-ink":         B.ink,
@@ -405,6 +493,7 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
       "--rfx-accent-deep": B.accentDeep || mix(B.accent, K, 0.24),
       "--rfx-surface":     B.surface,
       "--rfx-card":        B.card       || W,
+      "--rfx-card-grad-end": B.cardGradEnd || (B.card || W),
       "--rfx-selected":    B.selected   || B.accent,
       "--rfx-panel":       B.panel      || B.ink,
       "--rfx-on-panel":    B.onPanel    || "#FFFFFF",
@@ -1142,10 +1231,14 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
             quick: [6, 10, 15, 20] });
         }
 
-        q.push({ id: "mount", heading: "Where would the panels go?", cols: 1, options: [
+        q.push({ id: "mount", heading: "Where would the panels go?", cols: 1,
+          caption: "Ground mounted systems cost more per kilowatt. They need " +
+                   "footings, trenching and a longer electrical run back to the house.",
+          options: [
           { v: "roof",   t: "On my roof" },
           { v: "ground", t: "On the ground", n: "You have open land to use" },
-          { v: "unsure", t: "Not sure yet", n: "We will price both" } ] });
+          { v: "unsure", t: "Not sure yet", n: "We will price a roof system",
+            sub: true } ] });
         if (!a.mount) return q;
 
         // Shade only affects a roof array, and only when sizing from a bill.
@@ -1161,13 +1254,27 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
             { v: "o20",    t: "Over 20 years", n: "Worth replacing before panels go on" },
             { v: "unsure", t: "Not sure" } ] });
         }
+        /* Battery is the biggest price driver in this funnel: 15 kWh runs about
+           1.50x a no-battery system and 30 kWh about 2.05x, fitted on live
+           quotes. 62% of customers were adding one, and quotes above $70k went
+           cold far more often than any other band. Setting the magnitude in
+           multiples before the number lands is what stops the sticker shock,
+           and saying a battery can be added later keeps the door open rather
+           than forcing the decision now. */
         q.push({ id: "battery", heading: "Add battery backup?", cols: 1,
-          caption: "A battery keeps your home running when the grid goes down. " +
-                   "It is a significant addition to the cost.",
+          caption: "Solar on its own lowers your power bill. A battery is what " +
+                   "keeps your home running when the grid goes down. You can also " +
+                   "add one later, so starting without does not close the door.",
           options: [
-            { v: "none",  t: "No battery" },
-            { v: "kwh15", t: "15 kWh", n: "Runs essentials through an outage" },
-            { v: "kwh30", t: "30 kWh", n: "Covers more of the home for longer" } ] });
+            { v: "none",  t: "No battery",
+              n: "Lowest cost. Your panels shut off during an outage, which is a " +
+                 "utility safety rule, not a fault." },
+            { v: "kwh15", t: "15 kWh",
+              n: "Runs the essentials through a typical outage: fridge, lights, " +
+                 "internet, well pump. Adds about half again to the system cost." },
+            { v: "kwh30", t: "30 kWh",
+              n: "Whole home backup through longer outages. Roughly doubles the " +
+                 "system cost." } ] });
         return q;
       },
 
@@ -1203,17 +1310,31 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
           : "Sized from your bill. The exact system depends on your roof, " +
             "which we confirm on site.";
 
+        /* An old roof is a reason to bundle, not a reason to walk. Kept vague
+           on the discount so the rep owns that conversation. */
+        const bundle = a.roofAge === "o20"
+          ? "Your roof is over 20 years old, and that is good news to know now. " +
+            "It is worth replacing before panels go on, and we offer bundle " +
+            "pricing when you do both. Ask your representative what that looks " +
+            "like for your home."
+          : "";
+
         if (a.mount === "unsure") {
           const rows = [line("roof"), line("ground")];
+          /* Headline the roof figure rather than spanning both mounts. Spanning
+             took the roof floor and the ground ceiling, giving a $15,000 median
+             spread against $7,800 for people who picked roof. 22 of the 25
+             customers who did know chose roof, so roof is the honest default.
+             The ground row stays in the breakdown as the alternative. */
+          const r = rows[0];
           return {
-            low: Math.min(rows[0].low, rows[1].low),
-            high: Math.max(rows[0].high, rows[1].high),
-            breakdown: rows.map((r) => ({ label: r.label, low: r.low, high: r.high })),
-            note: note
+            low: r.low, high: r.high,
+            breakdown: rows.map((x) => ({ label: x.label, low: x.low, high: x.high })),
+            note: note, bundle: bundle
           };
         }
         const r = line(a.mount);
-        return { low: r.low, high: r.high, note: note };
+        return { low: r.low, high: r.high, note: note, bundle: bundle };
       }
     },
 
@@ -2362,7 +2483,8 @@ border:solid var(--rfx-on-ink);border-width:0 3px 3px 0;transform:rotate(42deg)}
 
         (breakdown ? '<div class="rfx-range">' + breakdown + '</div>' : "") +
         (showPay ? disclosureBlock() : "") +
-        (r.note ? '<div class="rfx-note">' + esc(r.note) + '</div>' : "") + recap +
+        (r.note ? '<div class="rfx-note">' + esc(r.note) + '</div>' : "") +
+        (r.bundle ? '<div class="rfx-note">' + esc(r.bundle) + '</div>' : "") + recap +
         '<div class="rfx-note"><strong>' + esc(S.reassurance || C.reassurance) + '</strong> ' +
         esc(S.priceCaveat || C.priceCaveat) + '</div>' + cta + againBtn + priorBlock + statRow +
         (function () {
