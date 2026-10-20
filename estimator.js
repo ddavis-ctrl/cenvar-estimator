@@ -135,6 +135,112 @@ background:linear-gradient(180deg,rgba(33,33,33,.18),rgba(33,33,33,.44))}
 .rfx-lock b{font-family:var(--rfx-display);font-weight:800;font-size:16px;
 letter-spacing:-.01em}
 .rfx-lock span{font-size:12.5px;color:var(--rfx-panel-mute);max-width:32ch;line-height:1.45}
+/* --- the payment tile, raised off the dark panel ---------------------------
+   Same construction as the option cards on the question screens: a top
+   highlight, a dark bottom rim and a drop shadow, so it reads as sitting
+   above the surface rather than printed on it. Tuned for a dark background,
+   where the highlight has to carry most of the lift. */
+.rfx-paytile{background:linear-gradient(180deg,#36444C 0%,#283138 62%,#20272C 100%);
+border-radius:calc(var(--rfx-radius-card) - 1px);padding:15px 17px 13px;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.22),
+           inset 0 -2px 0 rgba(0,0,0,.34),
+           0 6px 16px rgba(0,0,0,.34),0 2px 4px rgba(0,0,0,.26)}
+.rfx-paytile .rfx-figs{margin:0}
+.rfx-permonth-row{display:flex;align-items:baseline;justify-content:space-between;
+gap:12px;margin-top:7px}
+.rfx-permonth{font-size:13px;color:var(--rfx-panel-mute)}
+.rfx-sysprice{font-size:12.5px;font-style:italic;color:var(--rfx-panel-mute);
+text-align:right}
+
+/* --- cash and lease, as real buttons on the dark panel ------------------- */
+.rfx-panel-alt{display:flex;gap:9px;margin-top:13px}
+.rfx-jump{flex:1;font-family:var(--rfx-body);font-size:13.5px;font-weight:700;
+color:#fff;border:0;border-radius:var(--rfx-radius);padding:11px 8px;cursor:pointer;
+text-decoration:none;white-space:nowrap;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.30),
+           inset 0 -2px 0 rgba(0,0,0,.28),
+           0 4px 10px rgba(0,0,0,.30),0 1px 2px rgba(0,0,0,.22);
+transition:transform .12s ease,box-shadow .12s ease}
+.rfx-jump-cash{background:linear-gradient(180deg,#0A8347 0%,#056A38 62%,#045A2F 100%)}
+.rfx-jump-lease{background:linear-gradient(180deg,#CE3030 0%,#B42525 62%,#9C1F1F 100%)}
+.rfx-jump:hover{transform:translateY(-1px);
+box-shadow:inset 0 1px 0 rgba(255,255,255,.34),
+           inset 0 -2px 0 rgba(0,0,0,.28),
+           0 7px 16px rgba(0,0,0,.36),0 2px 4px rgba(0,0,0,.24)}
+.rfx-jump:active{transform:translateY(1px);
+box-shadow:inset 0 3px 7px rgba(0,0,0,.34),0 1px 2px rgba(0,0,0,.2)}
+
+/* --- the $0 down line, now directly above the call button ---------------- */
+.rfx-reassure{font-size:14.5px;font-weight:700;color:var(--rfx-ink);text-align:center;
+line-height:1.45;margin:0 0 11px}
+.rfx-save{background:var(--rfx-card);border:1px solid var(--rfx-line);
+border-radius:var(--rfx-radius-card);padding:16px 18px;margin-bottom:20px}
+.rfx-save-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+color:var(--rfx-mute);margin-bottom:10px}
+.rfx-save-h-lead{font-family:var(--rfx-display);font-size:16px;font-weight:800;
+letter-spacing:-.005em;text-transform:none;color:var(--rfx-accent);margin-bottom:13px}
+.rfx-save-row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;
+font-size:15px;color:var(--rfx-ink-2);border-bottom:1px solid var(--rfx-line)}
+.rfx-save-row strong{font-family:var(--rfx-display);font-weight:700;color:var(--rfx-ink);
+white-space:nowrap}
+.rfx-save-net strong{color:var(--rfx-accent)}
+/* Ahead or behind, coloured to match the cash button and the accent red. */
+.rfx-up{color:#056A38}
+.rfx-down{color:var(--rfx-accent)}
+/* A quiet question mark, sized to stay out of the way but still tappable. */
+.rfx-help{display:inline-flex;align-items:center;justify-content:center;
+width:15px;height:15px;margin-left:5px;vertical-align:1px;
+font-family:var(--rfx-body);font-size:10px;font-weight:700;line-height:1;
+color:var(--rfx-mute);background:var(--rfx-surface);
+border:1px solid var(--rfx-line-2);border-radius:50%;cursor:pointer;padding:0}
+.rfx-help:hover{color:var(--rfx-ink);border-color:var(--rfx-ink-2)}
+.rfx-help-bub{display:block;margin:7px 0 2px;padding:10px 12px;
+font-size:12.5px;line-height:1.5;color:var(--rfx-ink-2);
+background:var(--rfx-surface);border:1px solid var(--rfx-line-2);
+border-radius:var(--rfx-radius);max-width:46ch}
+.rfx-help-bub[hidden]{display:none}
+.rfx-save-big{border-bottom:0;padding-top:12px}
+.rfx-save-big strong{font-size:20px;letter-spacing:-.02em}
+.rfx-ways{display:flex;gap:6px;margin-bottom:12px}
+/* The tabs carry the same colours as the buttons up on the price panel, so
+   the green and red mean the same thing in both places. Unselected tabs are
+   outlined in their colour; the selected one fills. */
+.rfx-way{flex:1;font-family:var(--rfx-body);font-size:13.5px;font-weight:600;
+background:var(--rfx-card);border:1.5px solid var(--rfx-line-2);color:var(--rfx-ink-2);
+border-radius:var(--rfx-radius);padding:9px 6px;cursor:pointer;white-space:nowrap;
+transition:background .12s ease,color .12s ease,border-color .12s ease}
+.rfx-way[data-way="loan"]{border-color:#5A6A6A;color:var(--rfx-ink-2)}
+.rfx-way[data-way="cash"]{border-color:#056A38;color:#04562E}
+.rfx-way[data-way="lease"]{border-color:#B42525;color:#991F1F}
+.rfx-way:hover{filter:brightness(.97)}
+.rfx-way.is-on{color:#fff;border-color:transparent;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -2px 0 rgba(0,0,0,.26),
+           0 3px 8px rgba(27,42,51,.22)}
+.rfx-way[data-way="loan"].is-on{background:linear-gradient(180deg,#3A4750 0%,#262F35 62%,#1C2328 100%)}
+.rfx-way[data-way="cash"].is-on{background:linear-gradient(180deg,#0A8347 0%,#056A38 62%,#045A2F 100%)}
+.rfx-way[data-way="lease"].is-on{background:linear-gradient(180deg,#CE3030 0%,#B42525 62%,#9C1F1F 100%)}
+.rfx-way-note{font-size:12.5px;line-height:1.5;color:var(--rfx-mute);margin-top:10px}
+.rfx-way-note strong{color:var(--rfx-ink-2)}
+.rfx-work-toggle{width:100%;font-family:var(--rfx-body);font-size:14px;font-weight:600;
+color:var(--rfx-ink-2);background:var(--rfx-surface);border:1px solid var(--rfx-line-2);
+border-radius:var(--rfx-radius);padding:11px;margin-top:12px;cursor:pointer}
+.rfx-work-toggle:hover{border-color:var(--rfx-ink-2);color:var(--rfx-ink)}
+.rfx-work{margin-top:14px;padding-top:14px;border-top:1px solid var(--rfx-line)}
+.rfx-work[hidden]{display:none}
+.rfx-work-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+color:var(--rfx-mute);margin-bottom:8px}
+.rfx-work-row{display:flex;justify-content:space-between;gap:14px;padding:5px 0;
+font-size:14px;color:var(--rfx-ink-2)}
+.rfx-work-row strong{font-weight:600;color:var(--rfx-ink);white-space:nowrap}
+.rfx-scn{display:flex;gap:7px;margin-bottom:9px}
+.rfx-scn-btn{flex:1;font-family:var(--rfx-body);font-size:14px;color:var(--rfx-ink-2);
+background:var(--rfx-card);border:1px solid var(--rfx-line-2);
+border-radius:var(--rfx-radius);padding:9px;cursor:pointer}
+.rfx-scn-btn.is-on{border-color:var(--rfx-selected);background:var(--rfx-tint);
+color:var(--rfx-ink);font-weight:600}
+.rfx-work-note{font-size:13px;color:var(--rfx-ink-2);margin-bottom:10px}
+.rfx-work-src{font-size:11.5px;line-height:1.5;color:var(--rfx-mute)}
+.rfx-save-fine{font-size:11.5px;line-height:1.5;color:var(--rfx-mute);margin-top:10px}
 .rfx-prior{border:1px solid var(--rfx-line);border-radius:var(--rfx-radius-card);
 padding:14px 16px;margin:18px 0 0;background:var(--rfx-card)}
 .rfx-prior-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
@@ -196,11 +302,33 @@ background:linear-gradient(90deg,var(--rfx-accent-deep),var(--rfx-accent))}
 .rfx-break-v{font-family:var(--rfx-display);font-weight:600;white-space:nowrap}
 .rfx-pay{text-align:center;font-size:16px;color:var(--rfx-ink);margin:-6px 0 6px}
 .rfx-pay strong{font-family:var(--rfx-display);font-weight:800}
-.rfx-disclosure{font-size:11px;line-height:1.5;color:var(--rfx-mute);text-align:center;
-max-width:56ch;margin:0 auto 18px}
+/* The wrapper is full width and centres its children with flex, so nothing
+   depends on auto margins resolving, which is what kept failing before. */
+.rfx-disc{display:flex;flex-direction:column;align-items:center;
+text-align:center;margin:0 0 18px}
+.rfx-disc-terms{font-size:12px;color:var(--rfx-ink-2);margin:0 0 6px;font-weight:600}
+.rfx-disc-toggle{font-family:var(--rfx-body);font-size:12px;color:var(--rfx-ink-2);
+background:none;border:0;padding:2px 4px;cursor:pointer;text-decoration:underline;
+text-underline-offset:3px}
+.rfx-disc-toggle:hover{color:var(--rfx-ink)}
+.rfx-disclosure{font-size:10.5px;font-style:italic;line-height:1.5;
+color:var(--rfx-mute);text-align:center;max-width:62ch;margin:9px 0 0}
+.rfx-disclosure[hidden]{display:none}
 .rfx-note{background:var(--rfx-card);border-left:4px solid var(--rfx-accent);padding:15px 17px;
 font-size:15px;color:var(--rfx-ink-2);margin-bottom:22px}
 .rfx-recap{border-top:1px solid var(--rfx-line);margin-bottom:22px}
+/* The answers they gave, as a compact raised tile rather than a long list. */
+.rfx-recap-tile{border-top:0;border-radius:var(--rfx-radius-card);padding:11px 14px;
+margin-bottom:18px;
+background:linear-gradient(180deg,var(--rfx-card) 0%,
+  color-mix(in srgb,var(--rfx-card) 55%,var(--rfx-card-grad-end)) 72%,
+  var(--rfx-card-grad-end) 100%);
+border:1px solid var(--rfx-line-2);
+box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
+           inset 0 -2px 0 rgba(27,42,51,var(--d-rim)),
+           0 2px 6px rgba(27,42,51,.09)}
+.rfx-recap-tile .rfx-recap-row{padding:5px 0;font-size:13px;border:0}
+.rfx-recap-tile .rfx-recap-row + .rfx-recap-row{border-top:1px solid var(--rfx-line)}
 .rfx-recap-row{display:flex;justify-content:space-between;gap:16px;padding:11px 2px;
 border-bottom:1px solid var(--rfx-line);font-size:15px}
 .rfx-recap-k{color:var(--rfx-mute)}
@@ -897,10 +1025,314 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
        as typical on screen. */
     bill: { u100: 75, b100: 137, b175: 212, b250: 300, o350: 475 },
 
+    /* -----------------------------------------------------------------------
+       LIFETIME SAVINGS
+       Every figure below is an assumption, and `inflation` dominates all of
+       them. At 0% a financed system is roughly $18,000 behind over 25 years;
+       at 3% it is marginally ahead. Pick a rate the business will defend in
+       writing, state it on screen, and do not quietly raise it to make the
+       number look better. Inflated escalation is the specific thing the FTC
+       has pursued solar companies over.
+    ----------------------------------------------------------------------- */
+    savings: {
+      // The fitted sizing curve goes straight from bill to kW, so it never
+      // needs these. The savings maths does: one converts a dollar bill into
+      // kWh, the other converts a system size into production.
+      // $/kWh, Virginia residential all-in. EIA Electric Power Monthly put the
+      // state average at 15.96c in Feb 2026, up from 14.22c a year earlier,
+      // driven by the Dominion rate case and data-centre demand. Worth
+      // rechecking against EIA once or twice a year: a stale low rate
+      // understates the saving, because their bill buys less offset.
+      rate: 0.1596,
+      yieldPerKw: 1250,      // kWh produced per kW per year in Virginia
+
+      connectionFee: 10,     // what the utility still charges each month
+      degradation: 0.005,    // panel output lost per year
+
+      /* Two-stage escalation rather than one flat rate.
+
+         Virginia is not in a normal rate environment. The state average went
+         from 14.22c to 15.96c per kWh between Feb 2025 and Feb 2026, the SCC
+         approved a Dominion increase of $11.24 a month for 2026 with a
+         further $2.36 for 2027, and PJM attributes almost all of its load
+         growth forecast to data centres. So the near term is steep and the
+         long term is anybody's guess.
+
+         A flat high rate compounds into fantasy: 12% for 25 years produces a
+         $245,000 "saving". A flat low rate ignores increases already
+         approved. The taper reflects what is known for the first few years
+         and reverts to a long-run average after.
+
+         NOTHING PUBLISHED FORECASTS THESE RATES. They are our assumption,
+         informed by the sources above. Any customer-facing wording must say
+         so rather than implying a forecast exists.
+
+         THREE YEARS, not five. The SCC has approved increases covering 2026
+         and 2027. Three years spans both plus one year of buffer, so the
+         near-term assumption never extends further than the period a
+         regulator has actually ruled on. Five years would have been two
+         years of pure guesswork dressed as a rate case. */
+      inflationNear: 0.08,
+      nearYears: 3,
+      inflation: 0.03,       // long-run assumption after that
+
+      years: 25,             // efficient life of the system
+
+      /* Virginia SRECs. One certificate per MWh generated, sold through an
+         aggregator. Cenvar uses RECmint, and a residential system falls in
+         their "VA Distributed" category (1 MW or less).
+
+         RECmint VA Distributed, as of October 2026:
+           3 year locked  2026-2028   $34.00 per REC
+           5 year locked  2026-2030   $38.00 per REC
+           15 year upfront 2026-2040  $185.00 per kWdc
+           Market "mint and sell"     variable
+
+         WE MODEL THE 5 YEAR LOCKED RATE, THEN SPOT. Contracted where it is
+         contracted, market price where it is not. $28.50 after year 5 is
+         Flett Exchange's September 2026 listing for the same certificate.
+
+         Two things worth knowing. The 5 year rate sitting ABOVE the 3 year
+         is the market pricing in a rise: HB 628 raised Virginia demand 4.5x
+         against supply covering less than half of it, and Flett projects $65
+         to $70 near term. We do not model that. It is upside nobody was
+         promised.
+
+         And the 15 year upfront works out at roughly $10 per REC once you
+         divide it by the certificates it covers, against $38 on the 5 year
+         locked. It buys cash today at a heavy discount. Not modelled, but
+         worth a rep knowing before they offer it as the simple option.
+
+         OWNERSHIP MATTERS. SRECs belong to whoever owns the system. On a
+         lease the lessor keeps them, so lease income is zero. That is about
+         $8,800 of difference on a typical job and it belongs on screen. */
+      srec: {
+        enabled: true,
+        lockedPrice: 38.00,    // RECmint VA Distributed, 5 year locked
+        lockedYears: 5,
+        spotPrice: 28.50,      // Flett Exchange spot, used after the lock ends
+        source: "RECmint VA Distributed 5 year locked rate, then market"
+      },
+
+      /* =====================================================================
+         THE THREE WAYS TO PAY
+         ---------------------------------------------------------------------
+         Cash and loan are both ownership: the customer owns the system, keeps
+         any asset value, and the 25 year saving is theirs net of what they
+         paid. Lease is not: they never own it, so there is no asset at the
+         end and nothing to transfer if they sell the house. That difference
+         is on screen, because it is the thing a savings figure hides.
+
+         LEASE PRICING IS A PLACEHOLDER. $17.50 per kW per month is a
+         plausible market figure, not a Cenvar one. The rate decides the whole
+         answer: at $12.50 a typical customer nets $33,010 over 25 years, at
+         $22.50 they net minus $1,455. Nothing lease-related should be shown
+         to a customer until Kyle supplies the real terms.
+         ===================================================================== */
+      ways: {
+        cash: { label: "Pay cash", enabled: true },
+        loan: { label: "Monthly payment", enabled: true },
+        lease: {
+          label: "Lease", enabled: true,
+          /* FIXED monthly payment, confirmed with Kyle. The $0.115 per kWh is
+             the basis used to set it at signing: expected first-year output
+             multiplied by the rate, divided over twelve months. After that
+             the payment is fixed and rises 1% a year regardless of what the
+             panels actually produce.
+
+             That distinction matters to the customer. Under a PPA the
+             payment would fall as the panels age; under a fixed lease it
+             does not, so the effective cost per unit climbs from 11.5c in
+             year one to about 16.5c by year 25. It is still far below where
+             grid power is heading, but "11.5c" is a year one figure and
+             should not be presented as a rate they keep. */
+          perKwh: 0.115,
+          fixedPayment: true,
+          escalator: 0.01,     // the rate rises this much each year
+          termYears: 25,
+          buyoutAfterYears: 5,
+
+          /* Buyout priced as the present value of the payments that would
+             still be owed:  FMV = sum of P(t) / (1+r)^t  for t = 1..N
+
+             On the fixed payment structure this lands near 54% of the
+             original system price at an 8% discount rate, which sits inside
+             the range a residual-value basis would give. Sensible.
+
+             Buying out is strongly worth it, because owning the system also
+             unlocks the solar certificates the lessor had been keeping. */
+          discountRate: 0.08,   // investor's expected return, typically 6-10%
+          note: "You lease the system rather than owning it. Nothing to pay up " +
+                "front, and we maintain it for the life of the lease. You can " +
+                "buy it outright after year 5."
+        }
+      },
+
+      /* The two options a customer can switch between. Deliberately bounded:
+         both sit at or below what the documented rate increases support, so
+         neither can produce a number the business cannot defend. A free text
+         box here would let someone generate a $245,000 "saving" at 12% and
+         screenshot it, and that claim would still be ours. */
+      scenarios: [
+        { id: "cons", label: "Conservative",
+          near: 0.03, nearYears: 0, long: 0.03,
+          note: "Power prices rise 3% a year throughout, ignoring the increases " +
+                "already approved for 2026 and 2027." },
+        { id: "ours", label: "Our estimate",
+          near: 0.08, nearYears: 3, long: 0.03,
+          note: "Power prices rise 8% a year for 3 years while approved increases " +
+                "work through, then 3% a year." }
+      ]
+    },
+
     /* Direct-size path, for customers who already know what they want. */
     kwRange: { min: 4, max: 30, start: 10, step: 1 },
     wattsPerPanel: 450
   };
+
+  /* Works out what the quoted system does to their bill. Uses the offset the
+     model actually produces, not an assumed 100%: the fitted curve averages
+     about 75% offset, so assuming full coverage would overstate every figure
+     by a third. Capped at 1, because exported surplus is credited by the
+     utility on its own terms and should not be counted as a saving. */
+  // Compound factor at year y: the near-term rate for the first `nearYears`,
+  // the long-run rate after. Falls back to a single flat rate if nearYears
+  // is zero, so the model still works with the taper switched off.
+  function escalator(y) {
+    const S = SOLAR.savings;
+    const n = Math.min(y, S.nearYears || 0);
+    return Math.pow(1 + (S.inflationNear != null ? S.inflationNear : S.inflation), n) *
+           Math.pow(1 + S.inflation, Math.max(0, y - n));
+  }
+
+  /* Works out the 25 year position for each way of paying. The gross bill
+     saving is identical in all three: same system, same production. What
+     differs is what the customer pays out against it. */
+  function solarWays(bill, kw, cashPrice, loanPay, scenario) {
+    const S = SOLAR.savings, W = S.ways || {};
+    const keep = { n: S.inflationNear, y: S.nearYears, l: S.inflation };
+    if (scenario) {
+      S.inflationNear = scenario.near; S.nearYears = scenario.nearYears;
+      S.inflation = scenario.long;
+    }
+    const usageYr = (bill / S.rate) * 12;
+    const offset  = Math.min((kw * S.yieldPerKw) / usageYr, 1);
+    const lease   = W.lease || {};
+    /* The payment is set once from expected first-year output, then fixed
+       and escalated. It does NOT follow production, which is what separates
+       a lease from a PPA. Degradation is deliberately absent here. */
+    const leaseBaseYear = (lease.perKwh || 0) * kw * S.yieldPerKw;
+    const leaseCostIn = (y) => lease.fixedPayment === false
+      ? leaseBaseYear * Math.pow(1 - S.degradation, y) *
+        Math.pow(1 + (lease.escalator || 0), y)
+      : leaseBaseYear * Math.pow(1 + (lease.escalator || 0), y);
+    const leasePay = leaseCostIn(0) / 12;        // year one, monthly
+
+    // Present value of the payments still owed at the buyout point.
+    const buyoutFMV = (function () {
+      const after = lease.buyoutAfterYears || 0;
+      const term  = lease.termYears || S.years;
+      const r     = lease.discountRate;
+      if (!after || !r || !leasePay) return null;
+      let pv = 0;
+      for (let i = 1; i <= term - after; i++) {
+        pv += leaseCostIn(after + i - 1) / Math.pow(1 + r, i);
+      }
+      return pv;
+    })();
+
+    const srec = S.srec || {};
+    const srecOn = !!(srec.enabled && (srec.lockedPrice || srec.spotPrice));
+    const srecPriceAt = (y) => (y < (srec.lockedYears || 0))
+      ? (srec.lockedPrice || srec.spotPrice || 0)
+      : (srec.spotPrice || 0);
+
+    let gross = 0, cashCum = 0, cashPayback = null, srecTotal = 0, srecYear1 = 0;
+    let loanNet = 0, leaseNet = 0, leaseFirstPositive = null;
+    for (let y = 0; y < S.years; y++) {
+      const yr = bill * 12 * escalator(y) * offset * Math.pow(1 - S.degradation, y)
+                 - S.connectionFee * 12;
+      // One SREC per MWh generated, on everything the panels make, not just
+      // the share that offsets their own usage.
+      const mwh = (kw * S.yieldPerKw * Math.pow(1 - S.degradation, y)) / 1000;
+      const sr = srecOn ? mwh * srecPriceAt(y) : 0;
+      if (y === 0) srecYear1 = sr;
+      srecTotal += sr;
+
+      gross += yr;
+      // SRECs count toward payback, because the owner receives them.
+      cashCum += yr + sr;
+      if (cashPayback === null && cashCum >= cashPrice) cashPayback = y + 1;
+      loanNet += yr + sr - (y < 20 ? loanPay * 12 : 0);
+      const lp = leaseCostIn(y);
+      leaseNet += yr - lp;        // no SRECs: the lessor owns the system
+      if (leaseFirstPositive === null && yr - lp > 0) leaseFirstPositive = y + 1;
+    }
+    S.inflationNear = keep.n; S.nearYears = keep.y; S.inflation = keep.l;
+
+    return {
+      offset: offset, usageYr: usageYr, prodYr: kw * S.yieldPerKw, kw: kw,
+      grossSaving: gross, years: S.years,
+      srecOn: srecOn, srecTotal: srecTotal, srecYear1: srecYear1,
+      srecLocked: srec.lockedPrice, srecLockedYears: srec.lockedYears,
+      srecSpot: srec.spotPrice,
+      cash:  { upfront: cashPrice, monthly: 0, net: gross + srecTotal - cashPrice,
+               payback: cashPayback, owns: true, srec: srecTotal },
+      loan:  { upfront: 0, monthly: loanPay, net: loanNet, owns: true, srec: srecTotal },
+      lease: { upfront: 0, monthly: leasePay, net: leaseNet, owns: false, srec: 0,
+               buyoutFMV: buyoutFMV, discountRate: lease.discountRate,
+               perKwh: lease.perKwh, gridRate: S.rate,
+               escalator: lease.escalator, buyout: lease.buyoutAfterYears,
+               firstPositive: leaseFirstPositive, note: lease.note }
+    };
+  }
+
+  function solarSavings(bill, kw, monthlyPay, scenario) {
+    const S = SOLAR.savings;
+    // A scenario temporarily overrides the escalation figures, so the customer
+    // can switch between bounded options without the defaults changing.
+    const keep = { n: S.inflationNear, y: S.nearYears, l: S.inflation };
+    if (scenario) {
+      S.inflationNear = scenario.near; S.nearYears = scenario.nearYears;
+      S.inflation = scenario.long;
+    }
+    const restore = () => {
+      S.inflationNear = keep.n; S.nearYears = keep.y; S.inflation = keep.l;
+    };
+    const usageYr = (bill / S.rate) * 12;
+    const prodYr  = kw * S.yieldPerKw;
+    const offset  = Math.min(prodYr / usageYr, 1);
+
+    const saveNow = bill * offset - S.connectionFee;
+    let total = 0, cumulative = 0, payback = null;
+    for (let y = 0; y < S.years; y++) {
+      const billYr  = bill * 12 * escalator(y);
+      const offsetY = offset * Math.pow(1 - S.degradation, y);
+      const saveYr  = billYr * offsetY - S.connectionFee * 12;
+      total += saveYr;
+      cumulative += saveYr;
+      if (payback === null && monthlyPay && cumulative >= monthlyPay * 12 * (y + 1)) payback = y + 1;
+    }
+    restore();
+    if (!isFinite(total) || !isFinite(saveNow)) return null;
+    return {
+      offset: offset,
+      monthly: saveNow,
+      lifetime: total,
+      years: S.years,
+      inflation: S.inflation,
+      kw: kw,
+      usageYr: usageYr,
+      prodYr: prodYr,
+      basis: (S.nearYears && S.inflationNear != null)
+        ? "Assumes Virginia power prices keep rising at about " +
+          (S.inflationNear * 100).toFixed(0) + "% a year for " + S.nearYears +
+          " years, as approved rate increases work through, then settle to about " +
+          (S.inflation * 100).toFixed(0) + "% a year."
+        : "Assumes grid power rises about " + (S.inflation * 100).toFixed(1) + "% a year.",
+      net: monthlyPay ? total - monthlyPay * 240 : null
+    };
+  }
 
   const SERVICES = {
     roofing: {
@@ -1184,6 +1616,10 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
 
     solar: {
       label: "Solar", hubNote: "Roof and ground mounted systems",
+      // Lead with the monthly payment rather than the total. On a $30,000
+      // purchase the monthly is the number people decide on, and the total
+      // sits in the detail below rather than being the headline.
+      priceDisplay: "monthly",
       intro: "Get your solar price in about a minute",
       view: "satellite",
       // Inlined as a CSS mask, so the icon takes the colour of the text
@@ -1201,8 +1637,9 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
 
       reassurance: "$0 down. Nothing is due until your panels are installed. Invoice " +
         "due upon the passed inspection.",
-      priceCaveat: "This is what systems like yours typically cost. A free site " +
-        "assessment gives you the exact number, with no pressure to book.",
+      // Suppressed: the sizing note directly above already tells them the
+      // exact number comes from the on-site assessment.
+      priceCaveat: "",
 
       questionsFor(a) {
         const q = [{
@@ -1232,11 +1669,14 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
         }
 
         q.push({ id: "mount", heading: "Where would the panels go?", cols: 1,
-          caption: "Ground mounted systems cost more per kilowatt. They need " +
-                   "footings, trenching and a longer electrical run back to the house.",
+          caption: "Ground mounted systems usually cost more. They need footings, " +
+                   "electrical trenching back to the house, and often their own " +
+                   "permitting, any of which can add to the final price.",
           options: [
           { v: "roof",   t: "On my roof" },
-          { v: "ground", t: "On the ground", n: "You have open land to use" },
+          { v: "ground", t: "On the ground",
+            n: "You have open land to use. Expect a higher cost once trenching " +
+               "and permitting are worked out on site." },
           { v: "unsure", t: "Not sure yet", n: "We will price a roof system",
             sub: true } ] });
         if (!a.mount) return q;
@@ -1261,21 +1701,33 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
            multiples before the number lands is what stops the sticker shock,
            and saying a battery can be added later keeps the door open rather
            than forcing the decision now. */
-        q.push({ id: "battery", heading: "Add battery backup?", cols: 1,
-          caption: "Solar on its own lowers your power bill. A battery is what " +
-                   "keeps your home running when the grid goes down. You can also " +
-                   "add one later, so starting without does not close the door.",
-          options: [
-            { v: "none",  t: "No battery",
-              n: "Lowest cost. Your panels shut off during an outage, which is a " +
-                 "utility safety rule, not a fault." },
-            { v: "kwh15", t: "15 kWh",
-              n: "Runs the essentials through a typical outage: fridge, lights, " +
-                 "internet, well pump. Adds about half again to the system cost." },
-            { v: "kwh30", t: "30 kWh",
-              n: "Whole home backup through longer outages. Roughly doubles the " +
-                 "system cost." } ] });
+        /* Battery used to be a priced choice here. It is now an interest flag.
+           Pricing it inline forced a decision worth $17,500 to $30,000 before
+           anyone had spoken to a rep, and it roughly doubled the number on the
+           screen. Asking instead keeps the quote clean and still tells the rep
+           who wants the conversation. */
+        q.push({ id: "addons", type: "check",
+          heading: "Tick it and ask a Cenvar Solar representative to learn more!",
+          // The heading now carries the instruction, so the caption only has
+          // to answer the question it raises: does ticking cost me anything.
+          caption: "Optional, and it will not change your price.",
+          label: "Tell me about battery storage or EV charging",
+          note: "Backup power for outages, or a home charger for an electric vehicle" });
         return q;
+      },
+
+      waysFor(a, cashPrice, loanPay, scenario) {
+        const bill = a.bill === "known" ? null : SOLAR.bill[a.bill];
+        if (!bill) return null;
+        const mount = a.mount === "ground" ? "ground" : "roof";
+        return solarWays(bill, this.sizeFor(a, mount), cashPrice, loanPay, scenario);
+      },
+
+      savingsFor(a, monthlyPay, scenario) {
+        const bill = a.bill === "known" ? null : SOLAR.bill[a.bill];
+        if (!bill) return null;                 // direct-size path has no bill to compare
+        const mount = a.mount === "ground" ? "ground" : "roof";
+        return solarSavings(bill, this.sizeFor(a, mount), monthlyPay, scenario);
       },
 
       sizeFor(a, mount) {
@@ -1289,9 +1741,9 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       },
 
       price(a) {
-        if (!a.bill || !a.mount || !a.battery) return null;
+        if (!a.bill || !a.mount) return null;
         if (a.bill === "known" && !a.kw) return null;
-        const adder = SOLAR.battery[a.battery] || 0;
+        const adder = 0;   // battery is an interest flag now, not a priced option
 
         const line = (mount) => {
           const f = SOLAR.fit[mount];
@@ -1898,6 +2350,31 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       const head = heroMark("question") +
         '<p class="rfx-kicker">' + iconMark() + esc(qq.kicker || S.label) + '</p>' +
         '<h2 class="rfx-h">' + esc(qq.heading) + '</h2><div style="height:16px"></div>';
+      const cap = qq.caption
+        ? '<p class="rfx-sub" style="margin-top:-8px">' + esc(qq.caption) + '</p>' : "";
+
+      if (qq.type === "check") {
+        // Optional interest flag. Never blocks Continue: it is a question we
+        // are asking for our own benefit, so it must not cost a submission.
+        if (state.answers[qq.id] == null) state.answers[qq.id] = "no";
+        const on = state.answers[qq.id] === "yes";
+        stage.innerHTML = head + cap +
+          '<div class="rfx-options">' +
+            '<button type="button" class="rfx-opt rfx-check' + (on ? " is-on" : "") + '">' +
+              '<span class="rfx-opt-tick"></span><span class="rfx-opt-body">' +
+              '<span class="rfx-opt-title">' + esc(qq.label) + '</span>' +
+              (qq.note ? '<span class="rfx-opt-note">' + esc(qq.note) + '</span>' : "") +
+            '</span></button>' +
+          '</div>';
+        const b = q(".rfx-check");
+        b.addEventListener("click", () => {
+          const now = state.answers[qq.id] === "yes" ? "no" : "yes";
+          state.answers[qq.id] = now;
+          b.classList.toggle("is-on", now === "yes");
+        });
+        nextBtn.disabled = false;
+        return;
+      }
 
       if (qq.type === "stepper") {
         if (state.answers[qq.id] == null) state.answers[qq.id] = qq.start;
@@ -1932,8 +2409,6 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       }
 
       const cls = qq.cols === 3 ? " rfx-three" : qq.cols === 2 ? " rfx-two" : "";
-      const cap = qq.caption
-        ? '<p class="rfx-sub" style="margin-top:-8px">' + esc(qq.caption) + '</p>' : "";
       stage.innerHTML = head + cap + '<div class="rfx-options' + cls + '">' +
         qq.options.map((o) =>
           '<button type="button" class="rfx-opt' + (state.answers[qq.id] === o.v ? " is-on" : "") +
@@ -2125,6 +2600,7 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
     }
 
     function answerText(qq) {
+      if (qq.type === "check") return state.answers[qq.id] === "yes" ? "Yes" : "No";
       if (qq.type === "stepper") return String(state.answers[qq.id]) + (qq.unit ? " " + qq.unit : "");
       const o = (qq.options || []).find((x) => x.v === state.answers[qq.id]);
       return o ? o.t : "—";
@@ -2255,7 +2731,7 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
 
     function ctaBlock() {
       return '<a class="rfx-btn rfx-btn-primary rfx-call" style="width:100%" href="' +
-        PHONE_HREF + '">Call ' + esc(PHONE) + ' to schedule</a>' +
+        PHONE_HREF + '">Call ' + esc(PHONE) + ' to schedule a FREE estimate</a>' +
         (C.hours ? '<p class="rfx-fine rfx-center">' + esc(C.hours) + '</p>' : "") +
         (SETTINGS.bookingUrl
           ? '<p class="rfx-center" style="margin-top:12px"><a class="rfx-linkish" href="' +
@@ -2300,6 +2776,78 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
     /* Straight back to the first question, keeping the address and their
        details. No form, no second lead, no re-enrolment in the call-centre
        workflow. */
+    /* Handles both the payment tabs and the scenario toggle. Rebuilds only
+       the body that changed, so nothing re-submits and the count-up on the
+       price panel does not replay. */
+    function wireWorkings() {
+      const box = q(".rfx-save");
+      if (!box) return;
+
+      const rebuild = () => {
+        const payMid = (monthlyPayment(state.result.low, serviceId) +
+                        monthlyPayment(state.result.high, serviceId)) / 2;
+        const cashMid = (state.result.low + state.result.high) / 2;
+        const scenarios = SOLAR.savings.scenarios || [];
+        const scn = scenarios.filter((x) => x.id === (state.savingsScenario || "ours"))[0]
+                    || scenarios[0];
+        const w = S.waysFor(state.answers, cashMid, payMid, scn);
+        if (!w) return;
+        box.querySelector(".rfx-way-body").innerHTML =
+          wayRows(w, state.payWay || "loan");
+        const note = box.querySelector(".rfx-work-note");
+        if (note && scn) note.textContent = scn.note;
+      };
+
+      const tabs = box.querySelector(".rfx-ways");
+
+      // Tabs and the links up in the price panel both come through here, so
+      // they can never disagree about which option is showing.
+      const selectWay = (id, from) => {
+        if (!id) return;
+        state.payWay = id;
+        if (tabs) Array.prototype.forEach.call(tabs.children,
+          (c) => c.classList.toggle("is-on", c.dataset.way === id));
+        rebuild();
+        track("estimator_pay_way", { service: serviceId, way: id, from: from || "tab" });
+      };
+
+      if (tabs) tabs.addEventListener("click", (e) => {
+        const b = e.target.closest(".rfx-way");
+        if (b) selectWay(b.dataset.way, "tab");
+      });
+
+      // The links sit in the price panel, outside this box.
+      const panel = root.querySelector(".rfx-panel-alt");
+      if (panel) panel.addEventListener("click", (e) => {
+        const b = e.target.closest(".rfx-jump");
+        if (!b) return;
+        selectWay(b.dataset.way, "panel");
+        // Bring the comparison into view, since the panel sits above it.
+        if (box.scrollIntoView) box.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      const btn = box.querySelector(".rfx-work-toggle");
+      const work = box.querySelector(".rfx-work");
+      if (btn && work) btn.addEventListener("click", () => {
+        const open = work.hidden;
+        work.hidden = !open;
+        btn.textContent = open ? "Hide the savings assumptions"
+                               : "Open the savings assumption calculator";
+        if (open) track("estimator_savings_open", { service: serviceId });
+      });
+
+      const scn = box.querySelector(".rfx-scn");
+      if (scn) scn.addEventListener("click", (e) => {
+        const b = e.target.closest(".rfx-scn-btn");
+        if (!b) return;
+        state.savingsScenario = b.dataset.scn;
+        Array.prototype.forEach.call(scn.children,
+          (c) => c.classList.toggle("is-on", c === b));
+        rebuild();
+        track("estimator_savings_scenario", { service: serviceId, scenario: b.dataset.scn });
+      });
+    }
+
     function wireAgain() {
       const b = q(".rfx-again");
       if (!b) return;
@@ -2308,6 +2856,51 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
         state.index = 1;
         render();
         window.scrollTo({ top: root.offsetTop - 20, behavior: "smooth" });
+      });
+    }
+
+    /* The help bubbles. Click rather than hover, so they work on a phone.
+       Opening one closes any other, and a click anywhere else closes them. */
+    function wireHelp() {
+      const box = q(".rfx-save");
+      if (!box) return;
+      const closeAll = () => box.querySelectorAll(".rfx-help-bub")
+        .forEach((b) => { b.hidden = true; });
+      box.addEventListener("click", (e) => {
+        const btn = e.target.closest(".rfx-help");
+        if (!btn) { closeAll(); return; }
+        e.stopPropagation();
+        const bub = btn.nextElementSibling;
+        const wasOpen = bub && !bub.hidden;
+        closeAll();
+        if (bub && !wasOpen) {
+          bub.hidden = false;
+          track("estimator_help_open", { service: serviceId, topic: "srec" });
+        }
+      });
+      // A click outside the panel should close them too.
+      if (!root.__rfxHelpDoc) {
+        root.__rfxHelpDoc = true;
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".rfx-save")) {
+            root.querySelectorAll(".rfx-help-bub").forEach((b) => { b.hidden = true; });
+          }
+        });
+      }
+    }
+
+    function wireDisclosure() {
+      const box = q(".rfx-disc");
+      if (!box) return;
+      const btn = box.querySelector(".rfx-disc-toggle");
+      const body = box.querySelector(".rfx-disclosure");
+      if (!btn || !body) return;
+      btn.addEventListener("click", () => {
+        const open = body.hidden;
+        body.hidden = !open;
+        btn.textContent = open
+          ? "Hide loan information and terms"
+          : "Click here for loan information and terms";
       });
     }
 
@@ -2346,7 +2939,21 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
         .replace(/\{rate\}/g, p ? (p.apr != null ? p.apr : p.rate) : "")
         .replace(/\{min\}/g, p ? "$" + p.min.toLocaleString("en-US") : "")
         .replace(/\{lender\}/g, p ? (p.lender || "our lending partner") : "");
-      return '<p class="rfx-disclosure">' + esc(text) + '</p>';
+      /* Reg Z treats the monthly payment as a triggering term, so the material
+         credit terms have to be clear and conspicuous. They stay on screen as
+         a short line; only the long legal text collapses behind the link.
+         Hiding the APR and term behind a click would be the version that
+         fails that test. */
+      const terms = p
+        ? "$0 down &middot; " + p.months + " months &middot; " +
+          (p.apr != null ? p.apr : p.rate) + "% APR for well qualified buyers"
+        : "";
+      return '<div class="rfx-disc">' +
+        (terms ? '<p class="rfx-disc-terms">' + terms + '</p>' : "") +
+        '<button type="button" class="rfx-disc-toggle">' +
+          'Click here for loan information and terms</button>' +
+        '<p class="rfx-disclosure" hidden>' + esc(text) + '</p>' +
+      '</div>';
     }
 
     // A stable fingerprint of the current answers, so a genuinely new option
@@ -2381,13 +2988,125 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       });
     }
 
+    // One tab's worth of figures. Each way of paying gets the lines that
+    // actually apply to it rather than a shared template with blanks.
+    function wayRows(w, key) {
+      const o = w[key];
+      const row = (k, v, cls, help) =>
+        '<div class="rfx-save-row' + (cls ? " " + cls : "") + '"><span>' + k +
+        (help ? ' <button type="button" class="rfx-help" aria-label="What is this?">' +
+          '?</button><span class="rfx-help-bub" hidden>' + esc(help) + '</span>' : "") +
+        '</span><strong>' + v + '</strong></div>';
+
+      // Positive is green, negative is red. The Under $100 band finishes
+      // behind on a loan, and a green minus number would read as a win.
+      const big = (n) => '<span class="' + (n >= 0 ? "rfx-up" : "rfx-down") + '">' +
+        (n >= 0 ? "+" : "\u2212") + money(Math.abs(n)) + '</span>';
+
+      const SREC_HELP = "A Solar Renewable Energy Certificate. Your panels earn one " +
+        "for every 1,000 kWh they generate, whether you use that power or not, and " +
+        "Virginia power companies buy them to meet state targets. You keep this " +
+        "income as long as you own the system.";
+      let out = row("Your system covers", Math.round(w.offset * 100) + "% of what you use");
+
+      if (key === "cash") {
+        out += row("Paid up front", money(o.upfront));
+        out += row("Power bill saving, year one",
+          moneyExact(SOLAR.bill[state.answers.bill] * w.offset -
+            SOLAR.savings.connectionFee) + " a month");
+        if (w.srecOn) out += row("SREC income, year one",
+          moneyExact(w.srecYear1) + " a year", "", SREC_HELP);
+        out += row("Pays for itself in",
+          o.payback ? "year " + o.payback : "over " + w.years + " years");
+        out += row("Ahead after " + w.years + " years", big(o.net), "rfx-save-big");
+      } else if (key === "loan") {
+        const save = SOLAR.bill[state.answers.bill] * w.offset - SOLAR.savings.connectionFee;
+        out += row("Power bill saving, year one", moneyExact(save) + " a month");
+        if (w.srecOn) out += row("SREC income, year one",
+          moneyExact(w.srecYear1) + " a year", "", SREC_HELP);
+        out += row("Payment, while the loan runs", moneyExact(o.monthly) + " a month");
+        out += row("Net while financing",
+          (save - o.monthly >= 0 ? "+" : "\u2212") + moneyExact(Math.abs(save - o.monthly)) +
+          " a month", "rfx-save-net");
+        out += row("Ahead after " + w.years + " years", big(o.net), "rfx-save-big");
+      } else {
+        const save = SOLAR.bill[state.answers.bill] * w.offset - SOLAR.savings.connectionFee;
+        out += row("Power bill saving, year one", moneyExact(save) + " a month");
+        out += row("Your power costs, year one",
+          (o.perKwh * 100).toFixed(1) + "\u00a2 a unit instead of " +
+          (o.gridRate * 100).toFixed(1) + "\u00a2");
+        out += row("Lease payment, year one", moneyExact(o.monthly) + " a month");
+        out += row("Payment rises each year",
+          ((o.escalator || 0) * 100).toFixed(0) + "%, fixed either way");
+        // Stated rather than omitted. A blank line next to two options that
+        // have one reads as "not applicable" instead of "someone else keeps it".
+        if (w.srecOn) out += row("SRECs", "none, the owner keeps these", "", SREC_HELP);
+        out += row("You can buy it outright after", "year " + o.buyout);
+        if (o.buyoutFMV) out += row("Buyout at year " + o.buyout, money(o.buyoutFMV));
+        out += row("Ahead after " + w.years + " years", big(o.net), "rfx-save-big");
+        out += '<p class="rfx-way-note">' + esc(o.note || "") +
+          ' <strong>You do not own the system, so there is nothing to sell on, no ' +
+          'equipment value if you move, and the SRECs your panels earn belong to the ' +
+          'lease company rather than to you.</strong></p>';
+      }
+      return out;
+    }
+
+    function workingsPanel(w, scn, scenarios, activeScn) {
+      return '<div class="rfx-work" hidden>' +
+        '<p class="rfx-work-h">How we worked this out</p>' +
+        '<div class="rfx-work-row"><span>Your bill suggests you use</span><strong>' +
+          Math.round(w.usageYr).toLocaleString("en-US") + ' kWh a year</strong></div>' +
+        '<div class="rfx-work-row"><span>A ' + w.kw.toFixed(1) +
+          ' kW system here produces</span><strong>' +
+          Math.round(w.prodYr).toLocaleString("en-US") + ' kWh a year</strong></div>' +
+        '<div class="rfx-work-row"><span>Electricity price we used</span><strong>' +
+          (SOLAR.savings.rate * 100).toFixed(2) + '&cent; per kWh</strong></div>' +
+        '<div class="rfx-work-row"><span>Connection fee you keep paying</span><strong>' +
+          moneyExact(SOLAR.savings.connectionFee) + ' a month</strong></div>' +
+        '<div class="rfx-work-row"><span>Panel output falls by</span><strong>' +
+          (SOLAR.savings.degradation * 100).toFixed(1) + '% a year</strong></div>' +
+        (w.srecOn
+          ? '<div class="rfx-work-row"><span>SRECs your panels earn</span><strong>' +
+              (w.prodYr / 1000).toFixed(1) + ' a year</strong></div>' +
+            '<div class="rfx-work-row"><span>Locked rate, first ' + w.srecLockedYears +
+              ' years</span><strong>' + moneyExact(w.srecLocked) + ' each</strong></div>' +
+            '<div class="rfx-work-row"><span>After that, today\u2019s market price</span>' +
+              '<strong>' + moneyExact(w.srecSpot) + ' each</strong></div>'
+          : "") +
+        '<p class="rfx-work-h" style="margin-top:14px">What we assume about power prices</p>' +
+        '<div class="rfx-scn">' + scenarios.map((x) =>
+          '<button type="button" class="rfx-scn-btn' + (x.id === activeScn ? " is-on" : "") +
+          '" data-scn="' + x.id + '">' + esc(x.label) + '</button>').join("") + '</div>' +
+        '<p class="rfx-work-note">' + esc(scn ? scn.note : "") + '</p>' +
+        '<p class="rfx-work-src">Virginia\u2019s average residential price rose from ' +
+          '14.22&cent; to 15.96&cent; per kWh between February 2025 and February 2026 ' +
+          '(U.S. Energy Information Administration). The State Corporation Commission ' +
+          'approved a Dominion increase of about $11.24 a month for 2026 and a further ' +
+          '$2.36 for 2027. We assume those increases work through, then prices settle. ' +
+          '<strong>That is our assumption, not a forecast.</strong> Nobody publishes a ' +
+          '25 year projection of Virginia power prices, and we are not claiming to have one.</p>' +
+        (w.srecOn
+          ? '<p class="rfx-work-src" style="margin-top:9px">Your panels earn one Solar ' +
+            'Renewable Energy Certificate for every 1,000 kWh they generate, whether you ' +
+            'use that power or not, and Virginia power companies buy them to meet state ' +
+            'targets. You can lock a price for the first ' + w.srecLockedYears + ' years, ' +
+            'currently ' + moneyExact(w.srecLocked) + ' each. After that we use ' +
+            moneyExact(w.srecSpot) + ', today\u2019s market price, held flat. Some ' +
+            'analysts expect Virginia prices to rise well above that. We have not ' +
+            'assumed it. <strong>These belong to whoever owns the system, so a leased ' +
+            'system earns you none.</strong></p>'
+          : "") +
+      '</div>';
+    }
+
     function renderPrice() {
       // In preview there is no contact step, so the price is worked out here.
       // After a re-price there is no contact step either, and the answers have
       // changed, so it has to be worked out again or they see the old number.
       if (PREVIEW || state.sent) state.result = S.price(state.answers);
       const r = state.result;
-      const recap = '<div class="rfx-recap">' +
+      const recap = '<div class="rfx-recap rfx-recap-tile">' +
         (state.place.address ? '<div class="rfx-recap-row"><span class="rfx-recap-k">Home</span>' +
           '<span class="rfx-recap-v">' + esc(state.place.address) + '</span></div>' : "") +
         questions().filter((qq) => !qq.nav)
@@ -2421,7 +3140,7 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
           '<p class="rfx-sub">What you described does not fit a standard price, which usually ' +
           'means there is a better option than the catalog answer. Someone will call within ' +
           'one business day.</p>' + recap + cta;
-        wireCall(); wireAgain();
+        wireCall(); wireAgain(); wireDisclosure();
         return;
       }
 
@@ -2440,8 +3159,63 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       const payLow = monthlyPayment(r.low, serviceId);
       const payHigh = monthlyPayment(r.high, serviceId);
       const showPay = !!(payLow && payHigh);
+      /* "Or pay cash, or lease from $117 a month." Built here so it can be
+         left out entirely when the lease is off or has no price. */
+      let altLine = "";
+      if (S.priceDisplay === "monthly" && S.waysFor && showPay) {
+        const W = (SOLAR.savings.ways || {});
+        const lw = W.lease;
+        if (lw && lw.enabled !== false && lw.perKwh) {
+          const peek = S.waysFor(state.answers, (r.low + r.high) / 2,
+            (payLow + payHigh) / 2);
+          if (peek && peek.lease && peek.lease.monthly) {
+            // Tappable, because if the messaging points at the lease the
+            // number is the thing people will reach for.
+            altLine =
+              '<button type="button" class="rfx-jump rfx-jump-cash" data-way="cash">' +
+                'Pay cash</button>' +
+              '<button type="button" class="rfx-jump rfx-jump-lease" data-way="lease">' +
+                'Lease from ' + moneyExact(peek.lease.monthly) + ' a month</button>';
+          }
+        }
+      }
+
       const mo = (v) => showPay && v
         ? '<span class="rfx-fig-mo">' + moneyExact(v) + '/mo</span>' : "";
+
+      /* Three ways to pay, as tabs. Cash and loan are ownership, lease is
+         not, and the panel says so rather than letting a savings figure
+         imply otherwise. */
+      let savingsBlock = "";
+      if (S.priceDisplay === "monthly" && S.waysFor && showPay) {
+        const payMid = (payLow + payHigh) / 2;
+        const cashMid = (r.low + r.high) / 2;
+        const scenarios = SOLAR.savings.scenarios || [];
+        const activeScn = state.savingsScenario || "ours";
+        const scn = scenarios.filter((x) => x.id === activeScn)[0] || scenarios[0];
+        const w = S.waysFor(state.answers, cashMid, payMid, scn);
+        const WAYS = SOLAR.savings.ways || {};
+        const order = ["loan", "cash", "lease"].filter(
+          (k) => WAYS[k] && WAYS[k].enabled !== false);
+        const activeWay = state.payWay || "loan";
+
+        if (w && order.length) {
+          const tabs = '<div class="rfx-ways">' + order.map((k) =>
+            '<button type="button" class="rfx-way' + (k === activeWay ? " is-on" : "") +
+            '" data-way="' + k + '">' + esc(WAYS[k].label) + '</button>').join("") + '</div>';
+
+          savingsBlock =
+            '<div class="rfx-save">' +
+              '<p class="rfx-save-h rfx-save-h-lead">Monthly Breakdown &amp; ' +
+                '25 Year Savings Assumptions</p>' +
+              tabs +
+              '<div class="rfx-way-body">' + wayRows(w, activeWay) + '</div>' +
+              '<button type="button" class="rfx-work-toggle">' +
+                'Open the savings assumption calculator</button>' +
+              workingsPanel(w, scn, scenarios, activeScn) +
+            '</div>';
+        }
+      }
 
       // Small photo of their own home, reusing whatever we already fetched.
       const thumb = state.place.lat
@@ -2466,27 +3240,64 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
               '<div style="min-width:0"><div class="rfx-panel-for">Your estimate for</div>' +
               '<div class="rfx-panel-addr">' + esc(state.place.address) + '</div></div></div>'
             : "") +
-          '<div class="rfx-figs">' +
-            '<span class="rfx-fig">' +
-              '<span class="rfx-fig-total rfx-num" data-to="' + Math.round(r.low) + '">' +
-              money(r.low) + '</span>' + mo(payLow) +
-            '</span>' +
-            '<span class="rfx-figs-to">to</span>' +
-            '<span class="rfx-fig rfx-fig-hi">' +
-              '<span class="rfx-fig-total rfx-num" data-to="' + Math.round(r.high) +
-              '" data-suffix="' + plus + '">' + money(r.high) + plus + '</span>' +
-              mo(payHigh) +
-            '</span>' +
-          '</div>' +
-          '<div class="rfx-panel-rule"></div>' +
+          (S.priceDisplay === "monthly" && showPay
+            // Monthly leads, total moves to a quiet line underneath. On a
+            // purchase this size the payment is what people decide on.
+            ? '<div class="rfx-paytile">' +
+                '<div class="rfx-figs">' +
+                  '<span class="rfx-fig">' +
+                    '<span class="rfx-fig-total">' + moneyExact(payLow) + '</span>' +
+                  '</span>' +
+                  '<span class="rfx-figs-to">to</span>' +
+                  '<span class="rfx-fig rfx-fig-hi">' +
+                    '<span class="rfx-fig-total">' + moneyExact(payHigh) + '</span>' +
+                  '</span>' +
+                '</div>' +
+                '<div class="rfx-permonth-row">' +
+                  '<span class="rfx-permonth">per month</span>' +
+                  '<span class="rfx-sysprice">System price ' + money(r.low) + ' to ' +
+                    money(r.high) + plus + '</span>' +
+                '</div>' +
+              '</div>' +
+              // A pointer, not a second headline. Naming the lease figure here
+              // in the same size as the monthly would anchor everyone to the
+              // cheapest number before they have any context for it.
+              (altLine ? '<div class="rfx-panel-alt">' + altLine + '</div>' : "")
+            : '<div class="rfx-figs">' +
+                '<span class="rfx-fig">' +
+                  '<span class="rfx-fig-total rfx-num" data-to="' + Math.round(r.low) + '">' +
+                  money(r.low) + '</span>' + mo(payLow) +
+                '</span>' +
+                '<span class="rfx-figs-to">to</span>' +
+                '<span class="rfx-fig rfx-fig-hi">' +
+                  '<span class="rfx-fig-total rfx-num" data-to="' + Math.round(r.high) +
+                  '" data-suffix="' + plus + '">' + money(r.high) + plus + '</span>' +
+                  mo(payHigh) +
+                '</span>' +
+              '</div>' +
+              '<div class="rfx-panel-rule"></div>') +
         '</div>' +
 
         (breakdown ? '<div class="rfx-range">' + breakdown + '</div>' : "") +
+        // The financing disclosure, centred and small, sits directly under the
+        // price it describes.
         (showPay ? disclosureBlock() : "") +
         (r.note ? '<div class="rfx-note">' + esc(r.note) + '</div>' : "") +
-        (r.bundle ? '<div class="rfx-note">' + esc(r.bundle) + '</div>' : "") + recap +
-        '<div class="rfx-note"><strong>' + esc(S.reassurance || C.reassurance) + '</strong> ' +
-        esc(S.priceCaveat || C.priceCaveat) + '</div>' + cta + againBtn + priorBlock + statRow +
+        (r.bundle ? '<div class="rfx-note">' + esc(r.bundle) + '</div>' : "") +
+        // The payment caveat, without the $0 down line, which now sits
+        // immediately above the call button where it does the most work.
+        // A service can suppress this line with priceCaveat: "". The sizing
+        // note above it already says the same thing on solar.
+        (function () {
+          const cav = S.priceCaveat !== undefined ? S.priceCaveat : C.priceCaveat;
+          return cav ? '<div class="rfx-note">' + esc(cav) + '</div>' : "";
+        })() +
+        savingsBlock +
+        // What they told us, after the comparison rather than before it. The
+        // numbers are what they came for; this is the receipt.
+        recap +
+        '<p class="rfx-reassure">' + esc(S.reassurance || C.reassurance) + '</p>' +
+        cta + againBtn + priorBlock + statRow +
         (function () {
           const line = S.trustLine || C.trustLine;
           return line ? '<p class="rfx-fine rfx-center">' + esc(line) + '</p>' : "";
@@ -2494,6 +3305,9 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       revealPrice();
       wireCall();
       wireAgain();
+      wireWorkings();
+      wireDisclosure();
+      wireHelp();
     }
 
     /* --- Nav --- */
