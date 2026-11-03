@@ -86,6 +86,9 @@ padding:15px 16px;cursor:pointer;transition:border-color .14s ease,background .1
 .rfx-opt.rfx-opt-sub.is-on{border-left-color:var(--rfx-selected)}
 /* Product photo on an answer card. Both shots are the same window at the
    same angle so the only visible difference is the material. */
+/* Square variant, for material textures rather than product shots. */
+.rfx-opt-img.is-square{width:62px;height:62px;object-fit:cover}
+@media(max-width:380px){.rfx-opt-img.is-square{width:52px;height:52px}}
 .rfx-opt-img{width:52px;height:78px;flex:none;object-fit:contain;border-radius:8px;
 background:#fff;border:1px solid var(--rfx-line)}
 @media(max-width:380px){.rfx-opt-img{width:42px;height:63px}}
@@ -319,6 +322,14 @@ text-underline-offset:3px}
 .rfx-disclosure{font-size:10.5px;font-style:italic;line-height:1.5;
 color:var(--rfx-mute);text-align:center;max-width:62ch;margin:9px 0 0}
 .rfx-disclosure[hidden]{display:none}
+/* Sits under the trust line, quieter than it: a credential people check
+   rather than read. */
+.rfx-license{font-size:11.5px;color:var(--rfx-mute);text-align:center;
+letter-spacing:.02em;margin:5px 0 0}
+.rfx-note-lead{display:block;font-size:16px;font-weight:700;color:var(--rfx-ink);
+line-height:1.4}
+.rfx-note-sub{display:block;font-size:13.5px;color:var(--rfx-ink-2);line-height:1.5;
+margin-top:5px}
 .rfx-note{background:var(--rfx-card);border-left:4px solid var(--rfx-accent);padding:15px 17px;
 font-size:15px;color:var(--rfx-ink-2);margin-bottom:22px}
 .rfx-recap{border-top:1px solid var(--rfx-line);margin-bottom:22px}
@@ -743,6 +754,15 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       // `trustLine`. A manufacturer credential only belongs on the trade it
       // applies to, so Owens Corning lives on roofing and nowhere else.
       trustLine: "4.9 stars across 9,400+ reviews · BBB A+ rated",
+
+      /* Shown on the price screen under the trust line. Which one appears is
+         decided by the ZIP the customer already gave us: Virginia runs to
+         24658 and West Virginia occupies 24701 to 26886, so the two ranges do
+         not overlap. If the ZIP is missing or falls outside both, we show
+         both numbers rather than guess, because a Virginia-only line is wrong
+         for a West Virginia homeowner and vice versa. */
+      license:   "VA Contractors License #2705192604",
+      licenseWv: "WV Contractors License #WV065759",
 
       // Three tiles under the call button. Set to [] to hide the row.
       stats: [
@@ -1341,9 +1361,24 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
 
   const SERVICES = {
     roofing: {
-      label: "Roofing", hubNote: "Shingle, corrugated, or standing seam",
+      label: "Roofing",
+      // The satellite view is the hook here, so the address screen says so.
+      addressHead: "Let's find your roof from space!",
+      addressSub: "This confirms we service your area.", hubNote: "Shingle, corrugated, or standing seam",
       intro: "Get your roof price in about a minute",
-      trustLine: "Owens Corning Platinum Preferred · 4.9 stars across 9,400+ reviews",
+      // The ratings already appear in the stat tiles directly above this line,
+      // so the credential stands on its own here.
+      trustLine: "Owens Corning Platinum Preferred",
+
+      // Leads with the monthly, like solar. Every roofing quote clears the
+      // $3,000 financing minimum, so there is always a payment to show, and
+      // $16,750 is a number that benefits from being framed as $179 a month.
+      priceDisplay: "monthly",
+      priceLabel: "Total price",
+
+      priceCaveat: "This is what a job like yours typically costs.",
+      priceCaveatSub: "A free onsite measurement gives you the exact number, " +
+        "with no pressure to book.",
       // "street" uses Street View and falls back to satellite where Google
       // has no imagery. "satellite" always uses the overhead view.
       view: "satellite",   // overhead shows the roof planes and dormers
@@ -1354,10 +1389,13 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       // then paste the two asset URLs here.
       image: "https://cdn.prod.website-files.com/64244447fb8d73d5af3e8ce8/6a96f1e7e0cbe7cbea5b5d59_Funnel%20Pics.jpg", hubImage: "https://cdn.prod.website-files.com/64244447fb8d73d5af3e8ce8/6a96f1e54563089fded6ef7e_Funnel%20Pics%20No%20Watermark.jpg", imageAlt: "A completed Cenvar shingle roof",
       questions: [
-        { id: "material", heading: "What type of roof would you like a price on?", cols: 1, options: [
-          { v: "shingle",   t: "Asphalt shingles" },
-          { v: "corrugated", t: "Corrugated metal" },
-          { v: "standing",  t: "Standing seam metal" },
+        { id: "material", heading: "What material roof would you like a price on?", cols: 1, options: [
+          { v: "shingle", imgSquare: true,   t: "Asphalt shingles",
+            img: "data:image/webp;base64,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" },
+          { v: "corrugated", imgSquare: true, t: "Corrugated metal",
+            img: "data:image/webp;base64,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" },
+          { v: "standing", imgSquare: true,  t: "Standing seam metal",
+            img: "data:image/webp;base64,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" },
           { v: "unsure",    t: "Not sure yet", n: "We will price all three" } ] },
         { id: "size", heading: "How big is your home?", cols: 1, options: [
           { v: "s1015", t: "Up to 1,500 sq ft" },
@@ -2170,17 +2208,18 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
       /* The heading follows the mode. "Let's find your home" is right while
          they are still looking; once the photo is up we have found it, so
          asking them to confirm reads better than repeating the search. */
-      const head =
-        P.mode === "confirm" ? 'Is this your home?' : "Let's find your home!";
+      const head = P.mode === "confirm"
+        ? 'Is this your home?'
+        : (S.addressHead || "Let's find your home!");
 
       const sub =
         P.mode === "confirm"
           ? 'Take a look. Is this the home you want priced?'
           : P.mode === "manual"
-            ? 'This lets us confirm we service your area. Enter the address and ' +
-              'we will take it from there.'
-            : 'This lets us confirm we service your area. Start typing and pick ' +
-              'your address from the list.';
+            ? ((S.addressSub || "This lets us confirm we service your area.") +
+               " Enter the address and we will take it from there.")
+            : ((S.addressSub || "This lets us confirm we service your area.") +
+               " Start typing and pick your address from the list.");
 
       let body = "";
       if (P.mode === "manual") {
@@ -2457,7 +2496,8 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
           '<button type="button" class="rfx-opt' + (state.answers[qq.id] === o.v ? " is-on" : "") +
           (o.sub ? " rfx-opt-sub" : "") +
           '" data-v="' + o.v + '"><span class="rfx-opt-tick"></span>' +
-          (o.img ? '<img class="rfx-opt-img" src="' + o.img + '" alt="" ' +
+          (o.img ? '<img class="rfx-opt-img' + (o.imgSquare ? " is-square" : "") +
+            '" src="' + o.img + '" alt="" ' +
                    'loading="lazy" decoding="async">' : "") +
           '<span class="rfx-opt-body">' +
           '<span class="rfx-opt-title">' + esc(o.t) + '</span>' +
@@ -3302,7 +3342,8 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
                 '</div>' +
                 '<div class="rfx-permonth-row">' +
                   '<span class="rfx-permonth">per month</span>' +
-                  '<span class="rfx-sysprice">System price ' + money(r.low) + ' to ' +
+                  '<span class="rfx-sysprice">' + esc(S.priceLabel || "System price") +
+                    ' ' + money(r.low) + ' to ' +
                     money(r.high) + plus + '</span>' +
                 '</div>' +
               '</div>' +
@@ -3337,7 +3378,13 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
         // note above it already says the same thing on solar.
         (function () {
           const cav = S.priceCaveat !== undefined ? S.priceCaveat : C.priceCaveat;
-          return cav ? '<div class="rfx-note">' + esc(cav) + '</div>' : "";
+          if (!cav) return "";
+          // An optional second line, set smaller, for services that want the
+          // claim and the qualifier at different weights.
+          return '<div class="rfx-note"><span class="rfx-note-lead">' + esc(cav) +
+            '</span>' + (S.priceCaveatSub
+              ? '<span class="rfx-note-sub">' + esc(S.priceCaveatSub) + '</span>' : "") +
+          '</div>';
         })() +
         savingsBlock +
         // What they told us, after the comparison rather than before it. The
@@ -3347,7 +3394,22 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
         cta + againBtn + priorBlock + statRow +
         (function () {
           const line = S.trustLine || C.trustLine;
-          return line ? '<p class="rfx-fine rfx-center">' + esc(line) + '</p>' : "";
+          const va = S.license   !== undefined ? S.license   : C.license;
+          const wv = S.licenseWv !== undefined ? S.licenseWv : C.licenseWv;
+
+          // 24701 to 26886 is West Virginia. Anything else in range is
+          // Virginia. Outside both, or no ZIP at all, show both.
+          const z = parseInt(String(state.place.zip || "").slice(0, 5), 10);
+          let lic;
+          if (!va && !wv) lic = "";
+          else if (!wv) lic = va;
+          else if (!va) lic = wv;
+          else if (z >= 24701 && z <= 26886) lic = wv;
+          else if (z >= 20101 && z <= 24658) lic = va;
+          else lic = va + " · " + wv;
+
+          return (line ? '<p class="rfx-fine rfx-center">' + esc(line) + '</p>' : "") +
+                 (lic  ? '<p class="rfx-license">' + esc(lic) + '</p>' : "");
         })();
       revealPrice();
       wireCall();
