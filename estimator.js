@@ -1405,9 +1405,16 @@ box-shadow:inset 0 2px 0 rgba(255,255,255,var(--d-hi)),
         // This note is what defines the boundary for the customer, and the
         // answer moves the price by roughly 18%. Keep both sides worded as a
         // pair so there is no gap between them.
+        /* The wording alone leaves people guessing, and pitch moves the price
+           by about 18 percent, so the diagrams are drawn to the real ratios:
+           4/12 rises four inches over twelve across, the common walkable
+           slope, and 12/12 is 45 degrees and needs staging. Inline SVG, under
+           a kilobyte each, so there is nothing to host. */
         { id: "pitch", heading: "How steep is your roof?", cols: 1, options: [
-          { v: "normal", t: "Not very steep", n: "You could walk up it without sliding" },
-          { v: "steep",  t: "Very steep",     n: "Too steep to walk on safely" } ] }
+          { v: "normal", t: "Not very steep", n: "You could walk up it without sliding",
+            imgSquare: true, img: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij4KPHJlY3Qgd2lkdGg9IjEyOCIgaGVpZ2h0PSIxMjgiIGZpbGw9IiNGNEY2RjYiLz4KPHJlY3QgeD0iMjYuMCIgeT0iMTA0IiB3aWR0aD0iNzYiIGhlaWdodD0iMjYiIGZpbGw9IiNEM0RBRDkiLz4KPHBhdGggZD0iTTE4LjAgMTA0IEw2NC4wIDg4LjY2NjY2NjY2NjY2NjY3IEwxMTAuMCAxMDQgWiIgZmlsbD0iI0I0MjUyNSIvPgo8cGF0aCBkPSJNMTguMCAxMDQgTDExMC4wIDEwNCIgc3Ryb2tlPSIjOEE5NTk1IiBzdHJva2Utd2lkdGg9IjIiLz4KPHBhdGggZD0iTTEwOC4wIDEwNCBMMTA4LjAgOTAgTTEwOC4wIDEwNCBMOTQuMCAxMDQiCiAgICAgIHN0cm9rZT0iIzNBNDc0NyIgc3Ryb2tlLXdpZHRoPSIxLjYiIGZpbGw9Im5vbmUiIG9wYWNpdHk9Ii41NSIvPgo8dGV4dCB4PSI2NC4wIiB5PSIxNDYiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsQXJpYWwiIGZvbnQtc2l6ZT0iMTUiCiAgICAgIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMzQTQ3NDciIHRleHQtYW5jaG9yPSJtaWRkbGUiPjQvMTI8L3RleHQ+Cjwvc3ZnPg==" },
+          { v: "steep",  t: "Very steep",     n: "Too steep to walk on safely",
+            imgSquare: true, img: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij4KPHJlY3Qgd2lkdGg9IjEyOCIgaGVpZ2h0PSIxMjgiIGZpbGw9IiNGNEY2RjYiLz4KPHJlY3QgeD0iMjYuMCIgeT0iMTA0IiB3aWR0aD0iNzYiIGhlaWdodD0iMjYiIGZpbGw9IiNEM0RBRDkiLz4KPHBhdGggZD0iTTE4LjAgMTA0IEw2NC4wIDU4LjAgTDExMC4wIDEwNCBaIiBmaWxsPSIjQjQyNTI1Ii8+CjxwYXRoIGQ9Ik0xOC4wIDEwNCBMMTEwLjAgMTA0IiBzdHJva2U9IiM4QTk1OTUiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTA4LjAgMTA0IEwxMDguMCA5MCBNMTA4LjAgMTA0IEw5NC4wIDEwNCIKICAgICAgc3Ryb2tlPSIjM0E0NzQ3IiBzdHJva2Utd2lkdGg9IjEuNiIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iLjU1Ii8+Cjx0ZXh0IHg9IjY0LjAiIHk9IjE0NiIgZm9udC1mYW1pbHk9IkhlbHZldGljYSxBcmlhbCIgZm9udC1zaXplPSIxNSIKICAgICAgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzNBNDc0NyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MTIvMTI8L3RleHQ+Cjwvc3ZnPg==" } ] }
       ],
       price(a) {
         const label = { shingle: "Asphalt shingle", corrugated: "Corrugated metal", standing: "Standing seam" };
